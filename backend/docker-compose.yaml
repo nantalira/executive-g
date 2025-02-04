@@ -1,0 +1,44 @@
+version: "3.8"
+
+services:
+    app:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        container_name: laravel-app
+        working_dir: /var/www
+        volumes:
+            - ./src:/var/www
+        ports:
+            - "8000:8000"
+        depends_on:
+            - db
+        command: sh -c "php artisan serve --host=0.0.0.0 --port=8000"
+
+    db:
+        image: mysql:8.0
+        container_name: laravel-db
+        environment:
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_DATABASE: laravel
+            MYSQL_USER: laravel
+            MYSQL_PASSWORD: secret
+        ports:
+            - "3306:3306"
+        volumes:
+            - dbdata:/var/lib/mysql
+
+    phpmyadmin:
+        image: phpmyadmin/phpmyadmin
+        container_name: laravel-phpmyadmin
+        environment:
+            PMA_HOST: db
+            PMA_USER: laravel
+            PMA_PASSWORD: secret
+        ports:
+            - "8080:80"
+        depends_on:
+            - db
+
+volumes:
+    dbdata:
