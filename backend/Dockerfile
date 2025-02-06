@@ -20,3 +20,18 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 
 # Set working directory
 WORKDIR /var/www
+
+# Copy composer files
+COPY composer.json composer.lock ./
+
+# Install PHP dependencies if not already installed
+RUN if [ ! -d "vendor" ]; then composer install; fi
+
+# Copy the rest of the application code
+COPY . .
+
+# Set permissions for storage and cache
+RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
+
+# Generate application key if not already generated
+RUN if [ ! -f ".env" ] || ! grep -q "APP_KEY=" .env; then php artisan key:generate; fi
