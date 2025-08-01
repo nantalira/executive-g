@@ -1,0 +1,79 @@
+# Laravel .dockerignore
+# Ignore version control
+.git
+.gitignore
+.gitattributes
+
+# Ignore IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Ignore OS files
+.DS_Store
+Thumbs.db
+
+# Ignore temporary files
+*.tmp
+*.log
+*.pid
+*.gz
+
+# Ignore node modules (if using Vite/Mix)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Ignore development files
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Ignore build artifacts
+/public/hot
+/public/storage
+/storage/*.key
+/vendor/
+
+# Ignore cache files (but keep directory structure)
+bootstrap/cache/*.php
+storage/framework/cache/*
+storage/framework/sessions/*  
+storage/framework/views/*
+storage/logs/*
+
+# Ignore testing
+.phpunit.result.cache
+/coverage/
+_ide_helper.php
+_ide_helper_models.php
+.phpstorm.meta.php
+
+# Ignore documentation and readme files during build
+README.md
+CHANGELOG.md
+docs/
+*.md
+
+# Ignore Docker files (don't copy Docker files into the image)
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Ignore backup files
+*.bak
+*.backup
+
+# Ignore deployment files
+.env.example
+.deploy/
+deploy.php
+
+# Ignore misc development files
+phpunit.xml
+.phpunit.cache
+test_*.php
+tests/

@@ -1,0 +1,41 @@
+services:
+    # Laravel Backend Service
+    executive-backend:
+        build:
+            context: ./laravel
+            dockerfile: Dockerfile
+        container_name: executive-backend-prod
+        ports:
+            - "8000:8000"
+        env_file:
+            - ./laravel/.env
+        networks:
+            - database-network
+        volumes:
+            - executive_storage:/app/storage/app/public
+            - executive_logs:/app/storage/logs
+        restart: unless-stopped
+
+    # React Frontend Service (Production)
+    executive-frontend:
+        build:
+            context: ./react-frontend
+            dockerfile: Dockerfile
+        container_name: executive-frontend-prod
+        ports:
+            - "3000:3000"
+        networks:
+            - database-network
+        environment:
+            - REACT_APP_API_URL=http://localhost:8000/api
+        restart: unless-stopped
+        depends_on:
+            - executive-backend
+
+volumes:
+    executive_storage:
+    executive_logs:
+
+networks:
+    database-network:
+        external: true

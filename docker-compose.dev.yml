@@ -1,0 +1,45 @@
+services:
+    # Laravel Backend Service
+    executive-backend:
+        build:
+            context: ./laravel
+            dockerfile: Dockerfile
+        container_name: executive-backend-dev
+        ports:
+            - "8000:8000"
+        env_file:
+            - ./laravel/.env
+        networks:
+            - database-network
+        volumes:
+            - ./laravel:/app:delegated
+            - executive_storage:/app/storage/app/public
+            - executive_logs:/app/storage/logs
+        command: sh -c "composer install && php artisan serve --host=0.0.0.0 --port=8000"
+        restart: unless-stopped
+
+    # React Frontend Service (Development)
+    executive-frontend:
+        build:
+            context: ./react-frontend
+            dockerfile: Dockerfile.dev
+        container_name: executive-frontend-dev
+        ports:
+            - "3000:3000"
+        networks:
+            - database-network
+        volumes:
+            - ./react-frontend:/app:delegated
+            - /app/node_modules
+        environment:
+            - REACT_APP_API_URL=http://localhost:8000/api
+            - CHOKIDAR_USEPOLLING=true
+        restart: unless-stopped
+
+volumes:
+    executive_storage:
+    executive_logs:
+
+networks:
+    database-network:
+        external: true
