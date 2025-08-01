@@ -55,6 +55,18 @@ class ProductController extends Controller
             }
 
             $products = $query->paginate($perPage);
+            
+            // Transform product images to include full URL
+            $products->getCollection()->transform(function ($product) {
+                if ($product->productImages) {
+                    $product->productImages->transform(function ($image) {
+                        $image->name = $image->image_url;
+                        return $image;
+                    });
+                }
+                return $product;
+            });
+            
             return ResponseHelper::successWithPagination('Products retrieved successfully', $products);
         } catch (Exception $e) {
             return ResponseHelper::error('Internal server error');
@@ -89,6 +101,14 @@ class ProductController extends Controller
 
             if (!$product) {
                 return ResponseHelper::notFound('Product not found');
+            }
+
+            // Transform product images to include full URL
+            if ($product->productImages) {
+                $product->productImages->transform(function ($image) {
+                    $image->name = $image->image_url;
+                    return $image;
+                });
             }
 
             return ResponseHelper::successWithData('Product details retrieved successfully', $product);
@@ -128,6 +148,18 @@ class ProductController extends Controller
             $flashSale = $query->select('id', 'name', 'price', 'discount', 'avg_rating', 'total_rating', 'sale_id')
                 ->orderBy('created_at', 'desc')
                 ->paginate($perPage);
+                
+            // Transform product images to include full URL
+            $flashSale->getCollection()->transform(function ($product) {
+                if ($product->productImages) {
+                    $product->productImages->transform(function ($image) {
+                        $image->name = $image->image_url;
+                        return $image;
+                    });
+                }
+                return $product;
+            });
+                
             return ResponseHelper::successWithPagination('Flash sale products retrieved successfully', $flashSale);
         } catch (Exception $e) {
             return ResponseHelper::error($e->getMessage() ?: 'Internal server error');

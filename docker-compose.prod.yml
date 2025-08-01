@@ -6,7 +6,7 @@ services:
             dockerfile: Dockerfile
         container_name: executive-backend-prod
         ports:
-            - "8000:8000"
+            - "8100:8000"
         env_file:
             - ./laravel/.env
         networks:
@@ -23,7 +23,7 @@ services:
             dockerfile: Dockerfile
         container_name: executive-frontend-prod
         ports:
-            - "3000:3000"
+            - "3100:3000"
         networks:
             - database-network
         environment:

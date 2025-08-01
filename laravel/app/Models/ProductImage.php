@@ -42,11 +42,11 @@ class ProductImage extends Model
 
         // Check if name already contains the directory path
         if (str_starts_with($this->name, self::IMAGE_DIRECTORY)) {
-            return asset('storage/' . $this->name);
+            return config('app.url') . '/storage/' . $this->name;
         }
 
         $filePath = $this->getFullFilePath($this->name, self::IMAGE_DIRECTORY);
-        return asset('storage/' . $filePath);
+        return config('app.url') . '/storage/' . $filePath;
     }
 
     /**
