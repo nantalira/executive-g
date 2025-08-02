@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
@@ -55,7 +55,7 @@ class ProductController extends Controller
             }
 
             $products = $query->paginate($perPage);
-            
+
             // Transform product images to include full URL
             $products->getCollection()->transform(function ($product) {
                 if ($product->productImages) {
@@ -66,7 +66,7 @@ class ProductController extends Controller
                 }
                 return $product;
             });
-            
+
             return ResponseHelper::successWithPagination('Products retrieved successfully', $products);
         } catch (Exception $e) {
             return ResponseHelper::error('Internal server error');
@@ -94,9 +94,18 @@ class ProductController extends Controller
                 },
                 'sale' => function ($q) {
                     $q->select('id', 'discount as sale_discount');
+                },
+                'category' => function ($q) {
+                    $q->select('id', 'name');
+                },
+                'variants' => function ($q) {
+                    $q->select('id', 'name')
+                        ->with(['variantOptions' => function ($q) {
+                            $q->select('variant_id', 'name');
+                        }]);
                 }
             ])
-                ->select('id', 'name', 'price', 'discount', 'avg_rating', 'total_rating', 'sale_id')
+                ->select('id', 'name', 'price', 'discount', 'avg_rating', 'total_rating', 'stock', 'description', 'sale_id', 'category_id', 'variant_id')
                 ->find($productId);
 
             if (!$product) {
@@ -135,7 +144,7 @@ class ProductController extends Controller
                         ->where('pinned', 1);
                 },
                 'sale' => function ($q) {
-                    $q->select('id', 'discount as sale_discount', 'start_date', 'end_date');
+                    $q->select('id', 'discount as sale_discount');
                 }
             ])
                 ->whereHas('sale', function ($q) {
@@ -148,7 +157,7 @@ class ProductController extends Controller
             $flashSale = $query->select('id', 'name', 'price', 'discount', 'avg_rating', 'total_rating', 'sale_id')
                 ->orderBy('created_at', 'desc')
                 ->paginate($perPage);
-                
+
             // Transform product images to include full URL
             $flashSale->getCollection()->transform(function ($product) {
                 if ($product->productImages) {
@@ -159,7 +168,7 @@ class ProductController extends Controller
                 }
                 return $product;
             });
-                
+
             return ResponseHelper::successWithPagination('Flash sale products retrieved successfully', $flashSale);
         } catch (Exception $e) {
             return ResponseHelper::error($e->getMessage() ?: 'Internal server error');

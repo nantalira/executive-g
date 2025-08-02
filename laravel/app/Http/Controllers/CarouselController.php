@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Carousel;
@@ -17,7 +17,6 @@ class CarouselController extends Controller
     {
         try {
             $perPage = request()->query('items_per_page', 15); // Default to 15 items per page if not provided
-            $search = request()->query('search', '');
             $newArrival = request()->query('new_arrival', 'false');
 
             $query = Carousel::select('id', 'image', 'title', 'description', 'product_id');
@@ -28,15 +27,10 @@ class CarouselController extends Controller
             } else if ($newArrival == 'false') {
                 $query->where('is_new', 0);
             }
-            if ($search) {
-                $query->where('title', 'like', "%{$search}%")
-                    ->orWhere('description', 'like', "%{$search}%");
-            }
-
 
             $carousels = $query->orderBy('created_at', 'desc')->paginate($perPage);
             $carousels->getCollection()->transform(function ($item) {
-                $item->image = Storage::url($item->image);
+                $item->image = env('APP_URL') . Storage::url($item->image);
                 return $item;
             });
 

@@ -6,8 +6,12 @@
     },
     "servers": [
         {
-            "url": "http://localhost:8000",
+            "url": "http://localhost:8000/api/",
             "description": "Development server"
+        },
+        {
+            "url": "http://nantalira.site:8100/api/",
+            "description": "Production server"
         }
     ],
     "paths": {
@@ -123,6 +127,7 @@
             "post": {
                 "summary": "Login user",
                 "tags": ["Unauthenticated", "Auth"],
+                "security": [],
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -155,6 +160,15 @@
                                 },
                                 "example": {
                                     "message": "User logged in successfully"
+                                }
+                            }
+                        },
+                        "headers": {
+                            "Set-Cookie": {
+                                "description": "JWT token set in cookie",
+                                "schema": {
+                                    "type": "string",
+                                    "example": "tokenjwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
                                 }
                             }
                         }
@@ -633,6 +647,26 @@
                             "type": "boolean",
                             "example": false
                         }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "required": false,
+                        "description": "Page number (default 1)",
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "items_per_page",
+                        "in": "query",
+                        "required": false,
+                        "description": "Items per page (default 15)",
+                        "schema": {
+                            "type": "integer",
+                            "example": 15
+                        }
                     }
                 ],
                 "responses": {
@@ -696,22 +730,42 @@
                 }
             }
         },
-        "/products/flash-sale/{sale_id}": {
+        "/products/flash-sale": {
             "get": {
                 "summary": "Get all products in flash sale",
-                "tags": ["Unauthenticated", "HomePage"],
                 "parameters": [
                     {
-                        "name": "sale_id",
-                        "in": "path",
-                        "required": true,
-                        "description": "Sale ID",
+                        "name": "page",
+                        "in": "query",
+                        "required": false,
+                        "description": "Page number (default 1)",
                         "schema": {
                             "type": "integer",
                             "example": 1
                         }
+                    },
+                    {
+                        "name": "items_per_page",
+                        "in": "query",
+                        "required": false,
+                        "description": "Items per page (default 15)",
+                        "schema": {
+                            "type": "integer",
+                            "example": 15
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "required": false,
+                        "description": "Search by product name (default null)",
+                        "schema": {
+                            "type": "string",
+                            "example": ""
+                        }
                     }
                 ],
+                "tags": ["Unauthenticated", "HomePage"],
                 "responses": {
                     "200": {
                         "description": "Success message response",
@@ -722,85 +776,64 @@
                                 },
                                 "example": {
                                     "message": "Products fetched successfully",
-                                    "data": {
-                                        "id": 1,
-                                        "start_date": "2021-01-01:00:00:00",
-                                        "end_date": "2021-01-07:12:00:00",
-
-                                        "products": [
-                                            {
+                                    "data": [
+                                        {
+                                            "id": 1,
+                                            "name": "Product 1",
+                                            "price": 100,
+                                            "discount": 0.1,
+                                            "avg_rating": 4.5,
+                                            "total_ratings": 100,
+                                            "sale_id": 1,
+                                            "product_image": {
+                                                "product_id": 1,
+                                                "name": "https://example.com/image1.jpg"
+                                            },
+                                            "sale": {
                                                 "id": 1,
-                                                "name": "Product 1",
-                                                "price": 100,
-                                                "discount": 0.1,
-                                                "product_image": {
-                                                    "product_id": 1,
-                                                    "name": "https://example.com/image1.jpg"
-                                                },
-                                                "avg_rating": 4.5,
-                                                "total_ratings": 100
-                                            },
-                                            {
-                                                "id": 2,
-                                                "name": "Product 2",
-                                                "price": 200,
-                                                "discount": 0.2,
-                                                "product_image": {
-                                                    "product_id": 2,
-                                                    "name": "https://example.com/image2.jpg"
-                                                },
-                                                "avg_rating": 4.0,
-                                                "total_ratings": 200
-                                            },
-                                            {
-                                                "id": 3,
-                                                "name": "Product 3",
-                                                "price": 300,
-                                                "discount": 0.3,
-                                                "product_image": {
-                                                    "product_id": 3,
-                                                    "name": "https://example.com/image3.jpg"
-                                                },
-                                                "avg_rating": 3.5,
-                                                "total_ratings": 300
+                                                "sale_discount": 0.1
                                             }
-                                        ]
-                                    },
+                                        },
+                                        {
+                                            "id": 2,
+                                            "name": "Product 2",
+                                            "price": 200,
+                                            "discount": 0.2,
+                                            "avg_rating": 4.0,
+                                            "total_ratings": 200,
+                                            "sale_id": 2,
+                                            "product_image": {
+                                                "product_id": 2,
+                                                "name": "https://example.com/image2.jpg"
+                                            },
+                                            "sale": {
+                                                "id": 2,
+                                                "sale_discount": 0.2
+                                            }
+                                        },
+                                        {
+                                            "id": 3,
+                                            "name": "Product 3",
+                                            "price": 300,
+                                            "discount": 0.3,
+                                            "avg_rating": 3.5,
+                                            "total_ratings": 300,
+                                            "sale_id": 3,
+                                            "product_image": {
+                                                "product_id": 3,
+                                                "name": "https://example.com/image3.jpg"
+                                            },
+                                            "sale": {
+                                                "id": 3,
+                                                "sale_discount": 0.3
+                                            }
+                                        }
+                                    ],
                                     "pagination": {
                                         "current_page": 1,
                                         "total_pages": 1,
                                         "total_items": 4,
                                         "items_per_page": 15
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Field error response",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/FieldErrorResponse"
-                                },
-                                "example": {
-                                    "errors": {
-                                        "sale_id": ["Sale ID is required"]
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found error response",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ApiErrorResponse"
-                                },
-                                "example": {
-                                    "errors": {
-                                        "message": ["Sale not found"]
                                     }
                                 }
                             }
@@ -857,6 +890,16 @@
                         "schema": {
                             "type": "integer",
                             "example": 15
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "required": false,
+                        "description": "Search by product name (default null)",
+                        "schema": {
+                            "type": "string",
+                            "example": ""
                         }
                     },
                     {
@@ -928,38 +971,6 @@
                             }
                         }
                     },
-                    "400": {
-                        "description": "Field error response",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/FieldErrorResponse"
-                                },
-                                "example": {
-                                    "errors": {
-                                        "category_id": [
-                                            "Category ID is required"
-                                        ]
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found error response",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ApiErrorResponse"
-                                },
-                                "example": {
-                                    "errors": {
-                                        "message": ["Product not found"]
-                                    }
-                                }
-                            }
-                        }
-                    },
                     "500": {
                         "description": "internal Server Error",
                         "content": {
@@ -1007,34 +1018,40 @@
                                     "data": {
                                         "id": 1,
                                         "name": "Product 1",
+                                        "price": 100,
+                                        "discount": 0.1,
                                         "avg_rating": 4.5,
                                         "total_ratings": 100,
                                         "stock": 100,
-                                        "price": 100,
-                                        "discount": 0.1,
                                         "description": "Product description",
+                                        "sale_id": 1,
+                                        "variant_id": 1,
+                                        "category_id": 1,
                                         "product_images": [
                                             {
                                                 "product_id": 1,
-                                                "name": "https://example.com/image1.jpg"
+                                                "name": "https://example.com/image1.jpg",
+                                                "pinned": 1
                                             },
                                             {
                                                 "product_id": 1,
-                                                "name": "https://example.com/image2.jpg"
+                                                "name": "https://example.com/image2.jpg",
+                                                "pinned": 0
                                             },
                                             {
                                                 "product_id": 1,
-                                                "name": "https://example.com/image3.jpg"
+                                                "name": "https://example.com/image3.jpg",
+                                                "pinned": 0
                                             }
                                         ],
                                         "category": {
                                             "id": 1,
                                             "name": "Category 1"
                                         },
-                                        "variant_1": {
+                                        "variant": {
                                             "id": 1,
                                             "name": "Variant 1",
-                                            "options": [
+                                            "variant_options": [
                                                 {
                                                     "id": 1,
                                                     "name": "Option 1"
@@ -1042,34 +1059,6 @@
                                                 {
                                                     "id": 2,
                                                     "name": "Option 2"
-                                                }
-                                            ]
-                                        },
-                                        "variant_2": {
-                                            "id": 2,
-                                            "name": "Variant 2",
-                                            "options": [
-                                                {
-                                                    "id": 3,
-                                                    "name": "Option 3"
-                                                },
-                                                {
-                                                    "id": 4,
-                                                    "name": "Option 4"
-                                                }
-                                            ]
-                                        },
-                                        "variant_3": {
-                                            "id": 3,
-                                            "name": "Variant 3",
-                                            "options": [
-                                                {
-                                                    "id": 5,
-                                                    "name": "Option 5"
-                                                },
-                                                {
-                                                    "id": 6,
-                                                    "name": "Option 6"
                                                 }
                                             ]
                                         }
@@ -1103,6 +1092,178 @@
                                 "example": {
                                     "errors": {
                                         "message": ["Product not found"]
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                },
+                                "example": {
+                                    "errors": {
+                                        "message": ["Internal server error"]
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/flash-sale": {
+            "get": {
+                "summary": "Get all flash sale products",
+                "tags": ["Unauthenticated", "Flash Sale"],
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "required": false,
+                        "description": "Page number (default 1)",
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "items_per_page",
+                        "in": "query",
+                        "required": false,
+                        "description": "Items per page (default 15)",
+                        "schema": {
+                            "type": "integer",
+                            "example": 15
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success message response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SuccessWithPaginationResponse"
+                                },
+                                "example": {
+                                    "message": "Flash sale products fetched successfully",
+                                    "data": [
+                                        {
+                                            "id": 1,
+                                            "start_date": "2021-01-01:00:00:00",
+                                            "end_date": "2021-01-07:12:00:00",
+                                            "products": [
+                                                {
+                                                    "id": 1,
+                                                    "name": "Product 1",
+                                                    "price": 100,
+                                                    "discount": 0.1,
+                                                    "avg_rating": 4.5,
+                                                    "total_ratings": 100,
+                                                    "sale_id": 1,
+                                                    "product_image": {
+                                                        "product_id": 1,
+                                                        "name": "https://example.com/image1.jpg"
+                                                    },
+                                                    "sale_discount": 0.1
+                                                }
+                                            ]
+                                        }
+                                    ],
+                                    "pagination": {
+                                        "current_page": 1,
+                                        "total_pages": 1,
+                                        "total_items": 1,
+                                        "items_per_page": 15
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                },
+                                "example": {
+                                    "errors": {
+                                        "message": ["Internal server error"]
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/flash-sale/{id}": {
+            "get": {
+                "summary": "Get flash sale by ID",
+                "tags": ["Unauthenticated", "Flash Sale"],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "description": "Flash sale ID",
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success message response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SuccessWithDataResponse"
+                                },
+                                "example": {
+                                    "message": "Flash sale retrieved successfully",
+                                    "data": {
+                                        "id": 1,
+                                        "start_date": "2021-01-01:00:00:00",
+                                        "end_date": "2021-01-07:12:00:00",
+                                        "sale_discount": 0.1,
+                                        "status": "active"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Field error response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/FieldErrorResponse"
+                                },
+                                "example": {
+                                    "errors": {
+                                        "id": ["Flash sale ID is required"]
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found error response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                },
+                                "example": {
+                                    "errors": {
+                                        "message": ["Flash sale not found"]
                                     }
                                 }
                             }
@@ -3374,7 +3535,7 @@
                 "type": "apiKey",
                 "in": "cookie",
                 "name": "tokenjwt",
-                "description": "JWT token stored in an httpOnly cookie"
+                "description": "JWT token stored in an httpOnly cookie (production use)"
             }
         },
         "schemas": {
