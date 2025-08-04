@@ -24,7 +24,7 @@ const LoginPage = () => {
                     <Col md={6} className="order-1 order-md-1 mb-4 mb-md-0">
                         <div className="d-flex justify-content-center">
                             <img
-                                src="http://nantalira.site:8100/storage/products/images/01K1K1VBA4KNQ63JXAF9B1W4ZH.jpg"
+                                src="https://exclusive-api.nantalira.site/storage/products/images/01K1K1VBA4KNQ63JXAF9B1W4ZH.jpg"
                                 alt="Login Illustration"
                                 className="img-fluid rounded-3"
                                 style={{

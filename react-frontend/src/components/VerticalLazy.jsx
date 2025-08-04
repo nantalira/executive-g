@@ -6,14 +6,14 @@ import SectionHeader from "./SectionHeader";
 
 // Data produk dummy yang berbeda
 const bestSellingProducts = [
-    { id: 1, imageUrl: "http://nantalira.site:8100/storage/products/images/01K1K1VBA4KNQ63JXAF9B1W4ZH.jpg", name: "The north coat", price: "260", oldPrice: "360", reviews: 65 },
-    { id: 2, imageUrl: "http://nantalira.site:8100/storage/products/images/01K1K1VBA4KNQ63JXAF9B1W4ZH.jpg", name: "Gucci duffle bag", price: "960", oldPrice: "1160", reviews: 82 },
-    { id: 3, imageUrl: "http://nantalira.site:8100/storage/products/images/01K1K1VBA4KNQ63JXAF9B1W4ZH.jpg", name: "RGB liquid CPU Cooler", price: "160", oldPrice: "170", reviews: 91 },
-    { id: 4, imageUrl: "http://nantalira.site:8100/storage/products/images/01K1K1VBA4KNQ63JXAF9B1W4ZH.jpg", name: "Small BookSelf", price: "360", reviews: 45 },
-    { id: 5, imageUrl: "http://nantalira.site:8100/storage/products/images/01K1K1VBA4KNQ63JXAF9B1W4ZH.jpg", name: "The north coat", price: "260", oldPrice: "360", reviews: 65 },
-    { id: 6, imageUrl: "http://nantalira.site:8100/storage/products/images/01K1K1VBA4KNQ63JXAF9B1W4ZH.jpg", name: "Gucci duffle bag", price: "960", oldPrice: "1160", reviews: 82 },
-    { id: 7, imageUrl: "http://nantalira.site:8100/storage/products/images/01K1K1VBA4KNQ63JXAF9B1W4ZH.jpg", name: "RGB liquid CPU Cooler", price: "160", oldPrice: "170", reviews: 91 },
-    { id: 8, imageUrl: "http://nantalira.site:8100/storage/products/images/01K1K1VBA4KNQ63JXAF9B1W4ZH.jpg", name: "Small BookSelf", price: "360", reviews: 45 },
+    { id: 1, imageUrl: "https://exclusive-api.nantalira.site/storage/products/images/01K1K1VBA4KNQ63JXAF9B1W4ZH.jpg", name: "The north coat", price: "260", oldPrice: "360", reviews: 65 },
+    { id: 2, imageUrl: "https://exclusive-api.nantalira.site/storage/products/images/01K1K1VBA4KNQ63JXAF9B1W4ZH.jpg", name: "Gucci duffle bag", price: "960", oldPrice: "1160", reviews: 82 },
+    { id: 3, imageUrl: "https://exclusive-api.nantalira.site/storage/products/images/01K1K1VBA4KNQ63JXAF9B1W4ZH.jpg", name: "RGB liquid CPU Cooler", price: "160", oldPrice: "170", reviews: 91 },
+    { id: 4, imageUrl: "https://exclusive-api.nantalira.site/storage/products/images/01K1K1VBA4KNQ63JXAF9B1W4ZH.jpg", name: "Small BookSelf", price: "360", reviews: 45 },
+    { id: 5, imageUrl: "https://exclusive-api.nantalira.site/storage/products/images/01K1K1VBA4KNQ63JXAF9B1W4ZH.jpg", name: "The north coat", price: "260", oldPrice: "360", reviews: 65 },
+    { id: 6, imageUrl: "https://exclusive-api.nantalira.site/storage/products/images/01K1K1VBA4KNQ63JXAF9B1W4ZH.jpg", name: "Gucci duffle bag", price: "960", oldPrice: "1160", reviews: 82 },
+    { id: 7, imageUrl: "https://exclusive-api.nantalira.site/storage/products/images/01K1K1VBA4KNQ63JXAF9B1W4ZH.jpg", name: "RGB liquid CPU Cooler", price: "160", oldPrice: "170", reviews: 91 },
+    { id: 8, imageUrl: "https://exclusive-api.nantalira.site/storage/products/images/01K1K1VBA4KNQ63JXAF9B1W4ZH.jpg", name: "Small BookSelf", price: "360", reviews: 45 },
 ];
 
 const VerticalLazy = () => {
