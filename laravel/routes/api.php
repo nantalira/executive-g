@@ -49,6 +49,7 @@ Route::get('/flash-sale/{id}', [FlashSaleController::class, 'getById']);
 // Auth
 Route::post('/login', [AuthController::class, 'login'])->name('login');
 Route::post('/register', [AuthController::class, 'register']);
+Route::post('/refresh', [AuthController::class, 'refresh']); // Tidak menggunakan middleware
 
 // OTP and Password Reset (no auth required)
 Route::get('/send-otp/{phone_number}', [AuthController::class, 'sendOtp']);
@@ -58,6 +59,7 @@ Route::post('/forgot-password/{phone_number}', [AuthController::class, 'forgotPa
 // Authenticated routes - untuk endpoints lain yang butuh auth
 Route::middleware('custom.jwt')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/profile', [AuthController::class, 'profile']);
     Route::post('/change-password/{user_id}', [AuthController::class, 'changePassword']);
     // Route lain yang membutuhkan authentication akan ditambahkan di sini
 });

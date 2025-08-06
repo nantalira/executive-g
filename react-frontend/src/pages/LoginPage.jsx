@@ -1,10 +1,47 @@
 // src/pages/LoginPage.jsx
-import React from "react";
-import { Container, Row, Col, Form, Button } from "react-bootstrap";
+import React, { useState } from "react";
+import { Container, Row, Col, Form, Button, Alert } from "react-bootstrap";
 import { Google } from "react-bootstrap-icons";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { authService } from "../services"; // Import auth service
+import { useAuthStatus } from "../hooks/useAuthStatus"; // Import auth hook
 
 const LoginPage = () => {
+    const navigate = useNavigate();
+    const { updateAuthStatus } = useAuthStatus();
+
+    // State untuk form login
+    const [formData, setFormData] = useState({ email: "", password: "" });
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
+
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setError("");
+
+        try {
+            // Gunakan authService untuk login
+            const { expires_in } = await authService.login(formData);
+
+            // Update auth status setelah login berhasil
+            updateAuthStatus(true);
+            localStorage.setItem("expires_in", expires_in);
+
+            // Redirect ke homepage
+            navigate("/");
+        } catch (err) {
+            // Handle error dari auth service
+            const message = err.message || "Login failed. Check your credentials.";
+            setError(message);
+        } finally {
+            setLoading(false);
+        }
+    };
     return (
         <>
             <div className="bg-dark text-white text-center py-1">
@@ -40,14 +77,14 @@ const LoginPage = () => {
                     <Col md={6} className="order-2 order-md-2 px-md-5">
                         <h2 className="fw-bolder">Log in to Exclusive Gadget</h2>
                         <p className="mt-3">Enter your details below</p>
-
-                        <Form>
+                        {error && <Alert variant="danger">{error}</Alert>}
+                        <Form onSubmit={handleSubmit}>
                             <Form.Group className="mb-3" controlId="formBasicEmail">
-                                <Form.Control type="email" placeholder="E-mail" className="border-0 border-bottom rounded-1" />
+                                <Form.Control type="email" placeholder="E-mail" className="border-0 border-bottom rounded-1" name="email" value={formData.email} onChange={handleChange} />
                             </Form.Group>
 
                             <Form.Group className="mb-4" controlId="formBasicPassword">
-                                <Form.Control type="password" placeholder="Password" className="border-0 border-bottom rounded-1" />
+                                <Form.Control type="password" placeholder="Password" className="border-0 border-bottom rounded-1" name="password" value={formData.password} onChange={handleChange} />
                             </Form.Group>
 
                             <div className="text-end mb-3">
@@ -55,8 +92,15 @@ const LoginPage = () => {
                                     Forget Password?
                                 </a>
                             </div>
-                            <Button variant="danger" type="submit" size="lg" className="w-100 rounded-1">
-                                Log In
+                            <Button variant="danger" type="submit" size="lg" className="w-100 rounded-1" disabled={loading}>
+                                {loading ? (
+                                    <>
+                                        <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                        Logging in...
+                                    </>
+                                ) : (
+                                    "Log In"
+                                )}
                             </Button>
                         </Form>
 

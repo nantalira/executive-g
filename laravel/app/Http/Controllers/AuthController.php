@@ -75,10 +75,11 @@ class AuthController extends Controller
             }
 
             // Set JWT token in httpOnly cookie
+            // Cookie TTL harus sama dengan refresh_ttl, bukan jwt.ttl
             $cookie = cookie(
                 'tokenjwt',
                 $token,
-                config('jwt.ttl'), // TTL from config
+                config('jwt.refresh_ttl'), // Gunakan refresh_ttl agar cookie tidak hilang saat token expired
                 '/',
                 null,
                 false, // secure (set to true in production with HTTPS)
@@ -86,7 +87,7 @@ class AuthController extends Controller
             );
 
             $response = ResponseHelper::successWithData('Login successful', [
-                'token' => $token
+                'expires_in' => config('jwt.ttl') * 60, // Convert minutes to seconds
             ]);
 
             return $response->withCookie($cookie);
@@ -124,6 +125,86 @@ class AuthController extends Controller
             }
         } catch (JWTException $e) {
             return ResponseHelper::error('Could not logout user', 500);
+        }
+    }
+
+    /**
+     * Refresh JWT token
+     */
+    public function refresh(Request $request): JsonResponse
+    {
+        try {
+            // Get token from cookie
+            $token = $request->cookie('tokenjwt');
+
+            if (!$token) {
+                return ResponseHelper::error('No token provided', 401);
+            }
+
+            // Set the token for JWTAuth
+            JWTAuth::setToken($token);
+
+            try {
+                // Try to refresh the token (this will work even if token is expired but still within refresh_ttl)
+                $newToken = JWTAuth::refresh();
+
+                // Set new JWT token in httpOnly cookie
+                // Cookie TTL harus sama dengan refresh_ttl, bukan jwt.ttl
+                $cookie = cookie(
+                    'tokenjwt',
+                    $newToken,
+                    config('jwt.refresh_ttl'), // Gunakan refresh_ttl agar cookie tidak hilang saat token expired lagi
+                    '/',
+                    null,
+                    false, // secure (set to true in production with HTTPS)
+                    true   // httpOnly
+                );
+
+                $response = ResponseHelper::successWithData('Token refreshed successfully', [
+                    'expires_in' => config('jwt.ttl') * 60, // Convert minutes to seconds
+                ]);
+
+                return $response->withCookie($cookie);
+            } catch (JWTException $e) {
+                // Token tidak bisa di-refresh (mungkin sudah melewati refresh_ttl)
+                return ResponseHelper::error('Token cannot be refreshed. Please login again.', 401);
+            }
+        } catch (Exception $e) {
+            return ResponseHelper::error($e->getMessage() ?: 'Internal server error', 500);
+        }
+    }
+
+    /**
+     * Get user profile (protected route to test authentication)
+     */
+    public function profile(Request $request): JsonResponse
+    {
+        try {
+            // Get token from cookie
+            $token = $request->cookie('tokenjwt');
+
+            if (!$token) {
+                return ResponseHelper::error('No token provided', 401);
+            }
+
+            // Set the token for JWTAuth
+            JWTAuth::setToken($token);
+            $user = JWTAuth::authenticate();
+            // Get authenticated user
+            if (!$user) {
+                return ResponseHelper::error('User not found', 404);
+            }
+
+            return ResponseHelper::successWithData('User profile retrieved successfully', [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'phone' => $user->phone
+            ]);
+        } catch (JWTException $e) {
+            return ResponseHelper::error('Token is invalid', 401);
+        } catch (Exception $e) {
+            return ResponseHelper::error($e->getMessage() ?: 'Internal server error', 500);
         }
     }
 
