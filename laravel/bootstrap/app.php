@@ -12,6 +12,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        // Add TrustProxies middleware globally
+        $middleware->prepend(\App\Http\Middleware\TrustProxies::class);
+        
+        // Add SecureHeaders middleware for web routes
+        $middleware->web(\App\Http\Middleware\SecureHeaders::class);
+        
         $middleware->alias([
             'custom.jwt' => \App\Http\Middleware\JWTMiddleware::class,
         ]);

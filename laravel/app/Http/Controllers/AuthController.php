@@ -82,7 +82,7 @@ class AuthController extends Controller
                 config('jwt.refresh_ttl'), // Gunakan refresh_ttl agar cookie tidak hilang saat token expired
                 '/',
                 null,
-                false, // secure (set to true in production with HTTPS)
+                true, // secure (set to true in production with HTTPS)
                 true   // httpOnly
             );
 
@@ -117,7 +117,7 @@ class AuthController extends Controller
                 JWTAuth::invalidate();
 
                 // Clear the cookie by setting it to expire
-                $cookie = cookie('tokenjwt', '', -1, '/', null, false, true);
+                $cookie = cookie('tokenjwt', '', -1, '/', null, true, true);
 
                 return ResponseHelper::success('Logout successful')->withCookie($cookie);
             } else {
@@ -156,7 +156,7 @@ class AuthController extends Controller
                     config('jwt.refresh_ttl'), // Gunakan refresh_ttl agar cookie tidak hilang saat token expired lagi
                     '/',
                     null,
-                    false, // secure (set to true in production with HTTPS)
+                    true, // secure (set to true in production with HTTPS)
                     true   // httpOnly
                 );
 

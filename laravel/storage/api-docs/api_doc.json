@@ -10,7 +10,7 @@
             "description": "Development server"
         },
         {
-            "url": "http://nantalira.site:8100/api/",
+            "url": "https://exclusive-api.nantalira.site/api/",
             "description": "Production server"
         }
     ],
