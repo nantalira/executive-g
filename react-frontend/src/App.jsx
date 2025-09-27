@@ -5,6 +5,11 @@ import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import ProfilePage from "./pages/ProfilePage";
 import ProtectedRoute from "./components/ProtectedRoute";
+import CartPage from "./pages/CartPage";
+import CheckoutPage from "./pages/CheckoutPage";
+import AboutPage from "./pages/AboutPage";
+import ProductDetailPage from "./pages/ProductDetailPage";
+import ProductPage from "./pages/ProductPage";
 
 function App() {
     return (
@@ -20,7 +25,11 @@ function App() {
                     </ProtectedRoute>
                 }
             />
-            {/* Tambahkan rute lain sesuai kebutuhan */}
+            <Route path="/cart" element={<CartPage />} />
+            <Route path="/checkout" element={<CheckoutPage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/product" element={<ProductPage />} />
+            <Route path="/product/:id" element={<ProductDetailPage />} />
         </Routes>
     );
 }

@@ -4,6 +4,8 @@ import { ChevronDown, ChevronRight } from "react-bootstrap-icons";
 import AuthService from "../services/auth";
 import MainLayout from "../layouts/MainLayout";
 import LoadingOverlay from "../components/LoadingOverlay";
+import AddressBook from "../components/AddressBook";
+import OrderList from "../components/OrderList";
 import { Link } from "react-router-dom";
 
 const ProfilePage = () => {
@@ -131,13 +133,6 @@ const ProfilePage = () => {
                                                     >
                                                         Address Book
                                                     </Nav.Link>
-                                                    <Nav.Link
-                                                        className={`px-4 py-3 border-0 text-start ${activeTab === "payment" ? "text-danger bg-light" : "text-muted"}`}
-                                                        onClick={() => handleTabChange("payment")}
-                                                        style={{ cursor: "pointer" }}
-                                                    >
-                                                        My Payment Options
-                                                    </Nav.Link>
                                                 </Nav>
                                             </div>
                                         </Collapse>
@@ -155,29 +150,29 @@ const ProfilePage = () => {
                                             <div>
                                                 <Nav className="flex-column">
                                                     <Nav.Link
-                                                        className={`px-4 py-3 border-0 text-start ${activeTab === "returns" ? "text-danger bg-light" : "text-muted"}`}
+                                                        className={`px-4 py-3 border-0 text-start ${activeTab === "process" ? "text-danger bg-light" : "text-muted"}`}
                                                         style={{ cursor: "pointer" }}
-                                                        onClick={() => handleTabChange("returns")}
+                                                        onClick={() => handleTabChange("process")}
                                                     >
-                                                        My Returns
+                                                        On Process
                                                     </Nav.Link>
                                                     <Nav.Link
-                                                        className={`px-4 py-3 border-0 text-start ${activeTab === "cancellations" ? "text-danger bg-light" : "text-muted"}`}
+                                                        className={`px-4 py-3 border-0 text-start ${activeTab === "deliveries" ? "text-danger bg-light" : "text-muted"}`}
                                                         style={{ cursor: "pointer" }}
-                                                        onClick={() => handleTabChange("cancellations")}
+                                                        onClick={() => handleTabChange("deliveries")}
                                                     >
-                                                        My Cancellations
+                                                        In Deliveries
+                                                    </Nav.Link>
+                                                    <Nav.Link
+                                                        className={`px-4 py-3 border-0 text-start ${activeTab === "delivered" ? "text-danger bg-light" : "text-muted"}`}
+                                                        style={{ cursor: "pointer" }}
+                                                        onClick={() => handleTabChange("delivered")}
+                                                    >
+                                                        Delivered
                                                     </Nav.Link>
                                                 </Nav>
                                             </div>
                                         </Collapse>
-
-                                        {/* My WishList - Standalone */}
-                                        <div className="p-3 border-top">
-                                            <Nav.Link className={`px-1 py-2 border-0 text-start ${activeTab === "wishlist" ? "text-danger bg-light" : "text-muted"}`} style={{ cursor: "pointer" }} onClick={() => handleTabChange("wishlist")}>
-                                                My WishList
-                                            </Nav.Link>
-                                        </div>
                                     </Card.Body>
                                 </Card>
                             </Col>
@@ -260,40 +255,13 @@ const ProfilePage = () => {
                                             </>
                                         )}
 
-                                        {activeTab === "address" && (
-                                            <div className="text-center py-5">
-                                                <h5>Address Book</h5>
-                                                <p className="text-muted">Address book functionality will be implemented here</p>
-                                            </div>
-                                        )}
+                                        {activeTab === "address" && <AddressBook />}
 
-                                        {activeTab === "payment" && (
-                                            <div className="text-center py-5">
-                                                <h5>Payment Options</h5>
-                                                <p className="text-muted">Payment options functionality will be implemented here</p>
-                                            </div>
-                                        )}
+                                        {activeTab === "process" && <OrderList orderType="process" />}
 
-                                        {activeTab === "returns" && (
-                                            <div className="text-center py-5">
-                                                <h5>My Returns</h5>
-                                                <p className="text-muted">Returns history will be displayed here</p>
-                                            </div>
-                                        )}
+                                        {activeTab === "deliveries" && <OrderList orderType="deliveries" />}
 
-                                        {activeTab === "cancellations" && (
-                                            <div className="text-center py-5">
-                                                <h5>My Cancellations</h5>
-                                                <p className="text-muted">Cancelled orders will be displayed here</p>
-                                            </div>
-                                        )}
-
-                                        {activeTab === "wishlist" && (
-                                            <div className="text-center py-5">
-                                                <h5>My WishList</h5>
-                                                <p className="text-muted">Your wishlist items will be displayed here</p>
-                                            </div>
-                                        )}
+                                        {activeTab === "delivered" && <OrderList orderType="delivered" />}
                                     </Card.Body>
                                 </Card>
                             </Col>

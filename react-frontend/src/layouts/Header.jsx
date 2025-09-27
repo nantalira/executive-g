@@ -65,7 +65,9 @@ const Header = () => {
                             </Form>
 
                             {/* Icons - Desktop Only */}
-                            <Cart size={24} className="me-2 d-none d-lg-block" role="button" />
+                            <Link to="/cart" className="d-none d-lg-block me-2">
+                                <Cart size={24} role="button" className="text-dark" />
+                            </Link>
 
                             {/* User Account - Desktop */}
                             {loading ? (
@@ -126,7 +128,7 @@ const Header = () => {
                                 <Nav.Link href="#best-selling" className="mx-3 fw-semibold">
                                     Best Selling
                                 </Nav.Link>
-                                <Nav.Link href="#about" className="mx-3 fw-semibold">
+                                <Nav.Link as={Link} to="/about" className="mx-3 fw-semibold">
                                     About
                                 </Nav.Link>
                             </Nav>
@@ -134,7 +136,7 @@ const Header = () => {
                             {/* Mobile Cart & Account Links - Only visible on mobile */}
                             <Nav className="d-lg-none">
                                 <hr className="my-2" />
-                                <Nav.Link href="#cart" className="d-flex align-items-center mx-3 py-2">
+                                <Nav.Link as={Link} to="/cart" className="d-flex align-items-center mx-3 py-2">
                                     <Cart size={20} className="me-3" />
                                     <span className="fw-medium">My Cart</span>
                                 </Nav.Link>

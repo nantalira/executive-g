@@ -1,7 +1,7 @@
 // src/components/VerticalLazy.jsx
 import React from "react";
-import { Container, Row, Col, Button } from "react-bootstrap";
-import ProductCard from "./ProductCard";
+import { Container, Button } from "react-bootstrap";
+import ProductGrid from "./ProductGrid";
 import SectionHeader from "./SectionHeader";
 
 // Data produk dummy yang berbeda
@@ -20,13 +20,7 @@ const VerticalLazy = () => {
     return (
         <Container className="my-5">
             <SectionHeader title="This Month" subTitle="Explore Our Products" />
-            <Row className="d-flex align-items-center justify-content-between">
-                {bestSellingProducts.map((product) => (
-                    <Col key={product.id} xs="auto" className="mb-1 mx-auto">
-                        <ProductCard imageUrl={product.imageUrl} name={product.name} price={product.price} oldPrice={product.oldPrice} reviews={product.reviews} />
-                    </Col>
-                ))}
-            </Row>
+            <ProductGrid products={bestSellingProducts} maxProducts={8} />
             <div className="d-flex justify-content-center mt-4">
                 <Button variant="danger" className="text-white btn-lg">
                     View All
