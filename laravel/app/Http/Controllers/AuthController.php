@@ -71,7 +71,7 @@ class AuthController extends Controller
             $credentials = $request->only(['email', 'password']);
 
             if (!$token = JWTAuth::attempt($credentials)) {
-                return ResponseHelper::error('Invalid credentials', 400);
+                return ResponseHelper::error('Invalid credentials', 401);
             }
 
             // Set JWT token in httpOnly cookie
@@ -209,6 +209,53 @@ class AuthController extends Controller
     }
 
     /**
+     * Update user profile
+     */
+    public function updateProfile(Request $request): JsonResponse
+    {
+        try {
+            // Get token from cookie
+            $token = $request->cookie('tokenjwt');
+
+            if (!$token) {
+                return ResponseHelper::error('No token provided', 401);
+            }
+
+            // Set the token for JWTAuth
+            JWTAuth::setToken($token);
+            $authenticatedUser = JWTAuth::authenticate();
+
+            if (!$authenticatedUser) {
+                return ResponseHelper::error('Unauthorized', 401);
+            }
+
+            // Validate input
+            $validator = Validator::make($request->all(), [
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|unique:users,email,' . $authenticatedUser->id,
+                'phone' => 'required|string|unique:users,phone,' . $authenticatedUser->id,
+            ]);
+
+            if ($validator->fails()) {
+                return ResponseHelper::fieldError($validator->errors()->toArray());
+            }
+
+            // Update user profile
+            $authenticatedUser->update([
+                'name' => $request->name,
+                'email' => $request->email,
+                'phone' => $request->phone,
+            ]);
+
+            return ResponseHelper::success('Profile updated successfully');
+        } catch (JWTException $e) {
+            return ResponseHelper::error('Token is invalid', 401);
+        } catch (Exception $e) {
+            return ResponseHelper::error($e->getMessage() ?: 'Internal server error', 500);
+        }
+    }
+
+    /**
      * Send OTP to phone number
      */
     public function sendOtp($phone_number): JsonResponse
@@ -334,9 +381,24 @@ class AuthController extends Controller
     /**
      * Change password for authenticated user
      */
-    public function changePassword(Request $request, $user_id): JsonResponse
+    public function changePassword(Request $request): JsonResponse
     {
         try {
+            // Get token from cookie
+            $token = $request->cookie('tokenjwt');
+
+            if (!$token) {
+                return ResponseHelper::error('No token provided', 401);
+            }
+
+            // Set the token for JWTAuth
+            JWTAuth::setToken($token);
+            $authenticatedUser = JWTAuth::authenticate();
+
+            if (!$authenticatedUser) {
+                return ResponseHelper::error('Unauthorized', 401);
+            }
+
             // Validate input
             $validator = Validator::make($request->all(), [
                 'current_password' => 'required|string',
@@ -347,22 +409,18 @@ class AuthController extends Controller
                 return ResponseHelper::fieldError($validator->errors()->toArray());
             }
 
-            // Get user
-            $user = User::find($user_id);
-            if (!$user) {
-                return ResponseHelper::error('User not found', 404);
-            }
-
             // Verify current password
-            if (!Hash::check($request->current_password, $user->password)) {
+            if (!Hash::check($request->current_password, $authenticatedUser->password)) {
                 return ResponseHelper::error('Current password is incorrect', 400);
             }
 
             // Update password
-            $user->password = Hash::make($request->new_password);
-            $user->save();
+            $authenticatedUser->password = Hash::make($request->new_password);
+            $authenticatedUser->save();
 
             return ResponseHelper::success('Password changed successfully');
+        } catch (JWTException $e) {
+            return ResponseHelper::error('Token is invalid', 401);
         } catch (Exception $e) {
             return ResponseHelper::error($e->getMessage() ?: 'Internal server error');
         }

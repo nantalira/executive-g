@@ -1,50 +1,29 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, Button } from "react-bootstrap";
+import { useOutletContext } from "react-router-dom";
 import AddressModal from "./AddressModal";
+import AddressService from "../services/addressService";
+import { useApiErrorHandler } from "../hooks/useApiErrorHandler";
 
 const AddressBook = () => {
-    // Sample addresses data - in real app this would come from props or API
-    const [addresses, setAddresses] = useState([
-        {
-            id: 1,
-            label: "Home Address",
-            street: "Jalan Raya Ciledug No.123, Larangan, Tangerang Selatan",
-            city: "Banten, Indonesia, 15154",
-            phone: "+62 812 3456 7890",
-        },
-        {
-            id: 2,
-            label: "Office Address",
-            street: "Jl. Jend. Sudirman Kav. 52-53, SCBD",
-            city: "Jakarta Selatan, DKI Jakarta, 12190",
-            phone: "+62 21 5150 4000",
-        },
-        {
-            id: 3,
-            label: "Parent's House",
-            street: "Jl. Mawar No. 45, Kebayoran Baru",
-            city: "Jakarta Selatan, DKI Jakarta, 12110",
-            phone: "+62 812 9876 5432",
-        },
-        {
-            id: 4,
-            label: "Apartment Address",
-            street: "Apartemen Casablanca Mansion Tower A Lt.15 No.02",
-            city: "Jakarta Selatan, DKI Jakarta, 12870",
-            phone: "+62 811 2233 4455",
-        },
-        {
-            id: 5,
-            label: "Vacation House",
-            street: "Jl. Pantai Kuta No. 88, Badung",
-            city: "Bali, Indonesia, 80361",
-            phone: "+62 361 756789",
-        },
-    ]);
-
-    // Modal state
+    const { profile } = useOutletContext();
+    const { handleError, showSuccess } = useApiErrorHandler();
+    const [loading, setLoading] = useState(false);
+    const [addresses, setAddresses] = useState([]);
     const [showModal, setShowModal] = useState(false);
     const [selectedAddress, setSelectedAddress] = useState(null);
+
+    const fetchAddresses = async () => {
+        try {
+            setLoading(true);
+            const response = await AddressService.getAddresses();
+            setAddresses(response.data || []);
+        } catch (error) {
+            handleError(error, "Failed to fetch addresses");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleEdit = (id) => {
         const address = addresses.find((addr) => addr.id === id);
@@ -52,9 +31,18 @@ const AddressBook = () => {
         setShowModal(true);
     };
 
-    const handleDelete = (id) => {
+    const handleDelete = async (id) => {
         if (window.confirm("Are you sure you want to delete this address?")) {
-            setAddresses((prev) => prev.filter((addr) => addr.id !== id));
+            try {
+                setLoading(true);
+                await AddressService.deleteAddress(id);
+                showSuccess("Address deleted successfully!");
+                await fetchAddresses();
+            } catch (error) {
+                handleError(error, "Failed to delete address");
+            } finally {
+                setLoading(false);
+            }
         }
     };
 
@@ -63,46 +51,46 @@ const AddressBook = () => {
         setShowModal(true);
     };
 
-    const handleSaveAddress = (formData, addressId = null) => {
-        if (addressId) {
-            // Edit existing address
-            setAddresses((prev) =>
-                prev.map((addr) =>
-                    addr.id === addressId
-                        ? {
-                              ...addr,
-                              label: formData.fullName + "'s Address", // Generate label from name
-                              street: formData.streetAddress,
-                              city: `${formData.district}, ${formData.province}, ${formData.postalCode}`,
-                              phone: formData.phoneNumber,
-                              fullName: formData.fullName,
-                              detailAddress: formData.detailAddress,
-                              province: formData.province,
-                              district: formData.district,
-                              subdistrict: formData.subdistrict,
-                              postalCode: formData.postalCode,
-                          }
-                        : addr
-                )
-            );
-        } else {
-            // Add new address
-            const newAddress = {
-                id: Math.max(...addresses.map((a) => a.id)) + 1,
-                label: formData.fullName + "'s Address",
-                street: formData.streetAddress,
-                city: `${formData.district}, ${formData.province}, ${formData.postalCode}`,
-                phone: formData.phoneNumber,
-                fullName: formData.fullName,
-                detailAddress: formData.detailAddress,
+    const handleSaveAddress = async (formData, addressId = null) => {
+        try {
+            setLoading(true);
+
+            const addressData = {
+                fullname: formData.fullname,
+                phone: formData.phone,
+                address: formData.address,
+                detail: formData.detail || "",
                 province: formData.province,
                 district: formData.district,
-                subdistrict: formData.subdistrict,
-                postalCode: formData.postalCode,
+                sub_district: formData.sub_district,
+                village: formData.village,
+                postal_code: formData.postal_code,
+                pinned: formData.pinned ? 1 : 0,
             };
-            setAddresses((prev) => [...prev, newAddress]);
+
+            if (addressId) {
+                // Edit existing address
+                await AddressService.updateAddress(addressId, addressData);
+                showSuccess("Address updated successfully!");
+            } else {
+                // Add new address
+                await AddressService.addAddress(addressData);
+                showSuccess("Address added successfully!");
+            }
+
+            // Refresh addresses
+            await fetchAddresses();
+            setShowModal(false);
+        } catch (error) {
+            handleError(error, "Failed to save address");
+        } finally {
+            setLoading(false);
         }
     };
+
+    useEffect(() => {
+        fetchAddresses();
+    }, [profile]);
 
     return (
         <div>
@@ -116,28 +104,48 @@ const AddressBook = () => {
 
             {/* Address Cards */}
             <div className="d-flex flex-column gap-3">
-                {addresses.map((address) => (
-                    <Card key={address.id} className="border-2">
-                        <Card.Body className="p-4">
-                            <div className="d-flex justify-content-between align-items-start">
-                                <div className="flex-grow-1">
-                                    <h6 className="fw-bold mb-2">{address.label}</h6>
-                                    <p className="text-muted mb-2">{address.street}</p>
-                                    <p className="text-muted mb-2">{address.city}</p>
-                                    <p className="text-muted mb-0">Phone: {address.phone}</p>
-                                </div>
-                                <div className="d-flex gap-2">
-                                    <Button variant="outline-secondary" size="sm" className="fw-semibold" onClick={() => handleEdit(address.id)}>
-                                        Edit
-                                    </Button>
-                                    <Button variant="outline-danger" size="sm" className="fw-semibold" onClick={() => handleDelete(address.id)}>
-                                        Delete
-                                    </Button>
-                                </div>
-                            </div>
+                {loading && addresses.length === 0 ? (
+                    <div className="text-center py-4">
+                        <div className="spinner-border text-danger" role="status">
+                            <span className="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                ) : addresses.length === 0 ? (
+                    <Card className="border-2">
+                        <Card.Body className="p-4 text-center">
+                            <p className="text-muted mb-0">No addresses found. Add your first address!</p>
                         </Card.Body>
                     </Card>
-                ))}
+                ) : (
+                    addresses.map((address) => (
+                        <Card key={address.id} className="border-2">
+                            <Card.Body className="p-4">
+                                <div className="d-flex justify-content-between align-items-start">
+                                    <div className="flex-grow-1">
+                                        <div className="d-flex align-items-center gap-2 mb-2">
+                                            <h6 className="fw-bold mb-0">{address.fullname}</h6>
+                                            <p className="text-muted mb-0">| {address.phone}</p>
+                                            {address.pinned === 1 && <span className="badge bg-danger">Pinned</span>}
+                                        </div>
+                                        <p className="text-muted mb-2">{address.address}</p>
+                                        {address.detail && <p className="text-muted mb-2">{address.detail}</p>}
+                                        <p className="text-muted mb-2">
+                                            {address.village}, {address.sub_district}, {address.district}, {address.province}, {address.postal_code}
+                                        </p>
+                                    </div>
+                                    <div className="d-flex gap-2">
+                                        <Button variant="outline-secondary" size="sm" className="fw-semibold" onClick={() => handleEdit(address.id)} disabled={loading}>
+                                            Edit
+                                        </Button>
+                                        <Button variant="outline-danger" size="sm" className="fw-semibold" onClick={() => handleDelete(address.id)} disabled={loading}>
+                                            Delete
+                                        </Button>
+                                    </div>
+                                </div>
+                            </Card.Body>
+                        </Card>
+                    ))
+                )}
             </div>
 
             {/* Address Modal */}

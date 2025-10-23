@@ -1,12 +1,14 @@
 // src/pages/RegisterPage.jsx
 import React, { useState } from "react";
-import { Container, Row, Col, Form, Button, Alert, Spinner } from "react-bootstrap";
+import { Container, Row, Col, Form, Button, Spinner } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import { Google } from "react-bootstrap-icons";
 import { authService } from "../services"; // Import auth service
-
+import { useApiErrorHandler } from "../hooks/useApiErrorHandler"; // Import error handler hook
 const RegisterPage = () => {
     const navigate = useNavigate();
+    const { handleError, clearFieldError, hasFieldError, getFieldError, showSuccess } = useApiErrorHandler();
+    const [loading, setLoading] = useState(false);
 
     // Form state
     const [formData, setFormData] = useState({
@@ -17,11 +19,6 @@ const RegisterPage = () => {
         confirm_password: "",
     });
 
-    // UI state
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState("");
-    const [success, setSuccess] = useState("");
-
     // Handle input changes
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -30,20 +27,20 @@ const RegisterPage = () => {
             [name]: value,
         }));
 
-        // Clear error when user starts typing
-        if (error) setError("");
+        // Clear error untuk field yang sedang diubah
+        if (hasFieldError(name)) {
+            clearFieldError(name);
+        }
     };
 
     // Handle form submission
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
-        setError("");
-        setSuccess("");
 
         // Client-side validation
         if (formData.password !== formData.confirm_password) {
-            setError("Passwords do not match");
+            handleError({ message: "Passwords do not match" });
             setLoading(false);
             return;
         }
@@ -55,7 +52,7 @@ const RegisterPage = () => {
                 email: formData.email,
                 phone_number: formData.phone_number,
                 password: formData.password,
-                confirm_password: formData.confirm_password, // Backend mengharap password_confirmation
+                confirm_password: formData.confirm_password,
             };
 
             // Gunakan authService untuk register
@@ -63,29 +60,14 @@ const RegisterPage = () => {
 
             console.log("Registration successful");
 
-            setSuccess("Account created successfully! Please check your email for verification.");
+            showSuccess("Account created successfully!");
 
-            // Redirect to login page after 2 seconds
             setTimeout(() => {
                 navigate("/login");
             }, 2000);
         } catch (err) {
-            console.error("Registration error:", err);
-
-            // Handle error dari service layer
-            let errorMessage = "Registration failed. Please try again.";
-
-            if (err.message) {
-                errorMessage = err.message;
-            } else if (err.data?.errors) {
-                // Handle validation errors dari Laravel
-                const firstError = Object.values(err.data.errors)[0][0];
-                errorMessage = firstError;
-            } else if (err.data?.message) {
-                errorMessage = err.data.message;
-            }
-
-            setError(errorMessage);
+            // Handle error menggunakan error handler hook
+            handleError(err, "Registration failed. Please try again.");
         } finally {
             setLoading(false);
         }
@@ -126,35 +108,62 @@ const RegisterPage = () => {
                         <h2 className="fw-bolder">Create an account</h2>
                         <p className="mt-3">Enter your details below</p>
 
-                        {/* Error Alert */}
-                        {error && (
-                            <Alert variant="danger" className="mb-3">
-                                {error}
-                            </Alert>
-                        )}
-
-                        {/* Success Alert */}
-                        {success && (
-                            <Alert variant="success" className="mb-3">
-                                {success}
-                            </Alert>
-                        )}
-
                         <Form onSubmit={handleSubmit}>
                             <Form.Group className="mb-3">
-                                <Form.Control type="text" name="name" placeholder="Name" className="border-0 border-bottom rounded-1" value={formData.name} onChange={handleChange} required disabled={loading} />
+                                <Form.Control
+                                    type="text"
+                                    name="name"
+                                    placeholder="Name"
+                                    className={`border-0 border-bottom rounded-1 ${hasFieldError("name") ? "is-invalid" : ""}`}
+                                    value={formData.name}
+                                    onChange={handleChange}
+                                    required
+                                    disabled={loading}
+                                />
+                                {hasFieldError("name") && <div className="invalid-feedback d-block">{getFieldError("name")}</div>}
                             </Form.Group>
 
                             <Form.Group className="mb-3">
-                                <Form.Control type="email" name="email" placeholder="E-mail" className="border-0 border-bottom rounded-1" value={formData.email} onChange={handleChange} required disabled={loading} />
+                                <Form.Control
+                                    type="email"
+                                    name="email"
+                                    placeholder="E-mail"
+                                    className={`border-0 border-bottom rounded-1 ${hasFieldError("email") ? "is-invalid" : ""}`}
+                                    value={formData.email}
+                                    onChange={handleChange}
+                                    required
+                                    disabled={loading}
+                                />
+                                {hasFieldError("email") && <div className="invalid-feedback d-block">{getFieldError("email")}</div>}
                             </Form.Group>
 
                             <Form.Group className="mb-3">
-                                <Form.Control type="tel" name="phone_number" placeholder="Phone Number" className="border-0 border-bottom rounded-1" value={formData.phone_number} onChange={handleChange} required disabled={loading} />
+                                <Form.Control
+                                    type="tel"
+                                    name="phone_number"
+                                    placeholder="Phone Number"
+                                    className={`border-0 border-bottom rounded-1 ${hasFieldError("phone_number") ? "is-invalid" : ""}`}
+                                    value={formData.phone_number}
+                                    onChange={handleChange}
+                                    required
+                                    disabled={loading}
+                                />
+                                {hasFieldError("phone_number") && <div className="invalid-feedback d-block">{getFieldError("phone_number")}</div>}
                             </Form.Group>
 
                             <Form.Group className="mb-3">
-                                <Form.Control type="password" name="password" placeholder="Password" className="border-0 border-bottom rounded-1" value={formData.password} onChange={handleChange} required disabled={loading} minLength="6" />
+                                <Form.Control
+                                    type="password"
+                                    name="password"
+                                    placeholder="Password"
+                                    className={`border-0 border-bottom rounded-1 ${hasFieldError("password") ? "is-invalid" : ""}`}
+                                    value={formData.password}
+                                    onChange={handleChange}
+                                    required
+                                    disabled={loading}
+                                    minLength="6"
+                                />
+                                {hasFieldError("password") && <div className="invalid-feedback d-block">{getFieldError("password")}</div>}
                             </Form.Group>
 
                             <Form.Group className="mb-4">
@@ -162,13 +171,14 @@ const RegisterPage = () => {
                                     type="password"
                                     name="confirm_password"
                                     placeholder="Confirm Password"
-                                    className="border-0 border-bottom rounded-1"
+                                    className={`border-0 border-bottom rounded-1 ${hasFieldError("confirm_password") ? "is-invalid" : ""}`}
                                     value={formData.confirm_password}
                                     onChange={handleChange}
                                     required
                                     disabled={loading}
                                     minLength="6"
                                 />
+                                {hasFieldError("confirm_password") && <div className="invalid-feedback d-block">{getFieldError("confirm_password")}</div>}
                             </Form.Group>
 
                             <Button variant="danger" type="submit" size="lg" className="w-100 rounded-1" disabled={loading}>

@@ -1,9 +1,12 @@
 // src/components/CategoryCard.jsx
 import React, { useState } from "react";
 import { Card } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
+import * as Icons from "react-bootstrap-icons";
 
 const CategoryCard = ({ icon, name }) => {
     const [isHovered, setIsHovered] = useState(false);
+    const navigate = useNavigate();
 
     const handleMouseEnter = () => {
         setIsHovered(true);
@@ -11,6 +14,11 @@ const CategoryCard = ({ icon, name }) => {
 
     const handleMouseLeave = () => {
         setIsHovered(false);
+    };
+
+    const handleClick = () => {
+        // Navigate to products page with category filter (lowercase for URL consistency)
+        navigate(`/products?category=${encodeURIComponent(name.toLowerCase())}`);
     };
 
     // Determine current state styling
@@ -26,9 +34,18 @@ const CategoryCard = ({ icon, name }) => {
             }}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
+            onClick={handleClick}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    handleClick();
+                }
+            }}
         >
             <div className="fs-1 mb-3" style={{ transition: "color 0.3s ease" }}>
-                {icon}
+                {icon && Icons[icon] ? React.createElement(Icons[icon]) : <Icons.Tag />}
             </div>
             <Card.Text className="fw-medium mb-0" style={{ transition: "color 0.3s ease" }}>
                 {name}

@@ -1,22 +1,15 @@
 import React from "react";
 import { Navbar, Nav, Container, Form, FormControl, NavDropdown, Dropdown } from "react-bootstrap";
-import { PersonCircle, Cart, Search, Phone, Laptop, Watch, Camera, Headset, Joystick, PersonFill, BoxArrowRight, BagCheck } from "react-bootstrap-icons";
+import * as Icons from "react-bootstrap-icons";
 import { Link } from "react-router-dom";
 import { useAuthStatus } from "../hooks/useAuthStatus";
 import { handleLogout } from "../components/LogoutUtils";
-
-// Data kategori yang sama dengan CategorySection
-const categories = [
-    { id: 1, name: "Phones", icon: <Phone size={16} /> },
-    { id: 2, name: "Computers", icon: <Laptop size={16} /> },
-    { id: 3, name: "SmartWatch", icon: <Watch size={16} /> },
-    { id: 4, name: "Camera", icon: <Camera size={16} /> },
-    { id: 5, name: "HeadPhones", icon: <Headset size={16} /> },
-    { id: 6, name: "Gaming", icon: <Joystick size={16} /> },
-];
+import { useCategories } from "../contexts/CategoryContext";
 
 const Header = () => {
     const { isLoggedIn, loading } = useAuthStatus();
+    const { categories: allCategories, loading: categoriesLoading } = useCategories();
+    const categories = allCategories.slice(0, 10); // Ambil 10 categories pertama untuk header
 
     return (
         <>
@@ -55,18 +48,18 @@ const Header = () => {
                             {/* Mobile Search */}
                             <Form className="d-flex position-relative me-2 d-lg-none">
                                 <FormControl type="search" placeholder="Search..." className="bg-light border-0 ps-3 pe-4" size="sm" style={{ width: "150px" }} />
-                                <Search className="position-absolute end-0 me-2" style={{ top: "50%", transform: "translateY(-50%)" }} size={14} />
+                                <Icons.Search className="position-absolute end-0 me-2" style={{ top: "50%", transform: "translateY(-50%)" }} size={14} />
                             </Form>
 
                             {/* Desktop Search */}
                             <Form className="d-none d-lg-flex position-relative me-3">
                                 <FormControl type="search" placeholder="What are you looking for?" className="bg-light border-0 ps-3 pe-5" style={{ width: "240px" }} />
-                                <Search className="position-absolute end-0 me-3" style={{ top: "50%", transform: "translateY(-50%)" }} size={18} />
+                                <Icons.Search className="position-absolute end-0 me-3" style={{ top: "50%", transform: "translateY(-50%)" }} size={18} />
                             </Form>
 
                             {/* Icons - Desktop Only */}
-                            <Link to="/cart" className="d-none d-lg-block me-2">
-                                <Cart size={24} role="button" className="text-dark" />
+                            <Link to="/carts" className="d-none d-lg-block me-2">
+                                <Icons.Cart size={24} role="button" className="text-dark" />
                             </Link>
 
                             {/* User Account - Desktop */}
@@ -87,26 +80,26 @@ const Header = () => {
                                             boxShadow: "none",
                                         }}
                                     >
-                                        <PersonCircle size={24} style={{ color: "#28a745" }} />
+                                        <Icons.PersonCircle size={24} style={{ color: "#28a745" }} />
                                     </Dropdown.Toggle>
                                     <Dropdown.Menu>
                                         <Dropdown.Item as={Link} to="/profile">
-                                            <PersonFill className="me-2" size={16} />
+                                            <Icons.PersonFill className="me-2" size={16} />
                                             My Profile
                                         </Dropdown.Item>
                                         <Dropdown.Item href="#orders">
-                                            <BagCheck className="me-2" size={16} />
+                                            <Icons.BagCheck className="me-2" size={16} />
                                             Orders
                                         </Dropdown.Item>
                                         <Dropdown.Item onClick={handleLogout}>
-                                            <BoxArrowRight className="me-2" size={16} />
+                                            <Icons.BoxArrowRight className="me-2" size={16} />
                                             Logout
                                         </Dropdown.Item>
                                     </Dropdown.Menu>
                                 </Dropdown>
                             ) : (
                                 <Link to="/login" className="text-dark">
-                                    <PersonCircle size={24} className="d-none d-lg-block" role="button" style={{ color: "#6c757d" }} />
+                                    <Icons.PersonCircle size={24} className="d-none d-lg-block" role="button" style={{ color: "#6c757d" }} />
                                 </Link>
                             )}
                         </div>
@@ -114,18 +107,29 @@ const Header = () => {
                         <Navbar.Toggle aria-controls="basic-navbar-nav" />
                         <Navbar.Collapse id="basic-navbar-nav" className="order-lg-2">
                             <Nav className="mx-auto">
-                                <Nav.Link href="#new-arrival" className="active mx-3 fw-semibold">
+                                <Nav.Link href="/products?filter=new-arrival" className="active mx-3 fw-semibold">
                                     New Arrival
                                 </Nav.Link>
                                 <NavDropdown title="Categories" id="categories-dropdown" className="mx-3" menuVariant="light">
-                                    {categories.map((category) => (
-                                        <NavDropdown.Item key={category.id} href={`#category-${category.name.toLowerCase()}`} className="d-flex align-items-center py-2">
-                                            <span className="me-3 ">{category.icon}</span>
-                                            <span className="fw-medium">{category.name}</span>
+                                    {categoriesLoading ? (
+                                        <NavDropdown.Item disabled>
+                                            <div className="d-flex align-items-center">
+                                                <div className="spinner-border spinner-border-sm me-2" role="status">
+                                                    <span className="visually-hidden">Loading...</span>
+                                                </div>
+                                                Loading categories...
+                                            </div>
                                         </NavDropdown.Item>
-                                    ))}
+                                    ) : (
+                                        categories.map((category) => (
+                                            <NavDropdown.Item key={category.id} href={`/products?category=${category.name.toLowerCase()}`} className="d-flex align-items-center py-2">
+                                                <span className="me-3">{category.icon && Icons[category.icon] ? React.createElement(Icons[category.icon], { size: 16 }) : <Icons.Tag size={16} />}</span>
+                                                <span className="fw-medium">{category.name}</span>
+                                            </NavDropdown.Item>
+                                        ))
+                                    )}
                                 </NavDropdown>
-                                <Nav.Link href="#best-selling" className="mx-3 fw-semibold">
+                                <Nav.Link href="/products?filter=best-selling" className="mx-3 fw-semibold">
                                     Best Selling
                                 </Nav.Link>
                                 <Nav.Link as={Link} to="/about" className="mx-3 fw-semibold">
@@ -136,8 +140,8 @@ const Header = () => {
                             {/* Mobile Cart & Account Links - Only visible on mobile */}
                             <Nav className="d-lg-none">
                                 <hr className="my-2" />
-                                <Nav.Link as={Link} to="/cart" className="d-flex align-items-center mx-3 py-2">
-                                    <Cart size={20} className="me-3" />
+                                <Nav.Link as={Link} to="/carts" className="d-flex align-items-center mx-3 py-2">
+                                    <Icons.Cart size={20} className="me-3" />
                                     <span className="fw-medium">My Cart</span>
                                 </Nav.Link>
 
@@ -145,21 +149,21 @@ const Header = () => {
                                 {isLoggedIn ? (
                                     <>
                                         <Nav.Link as={Link} to="/profile" className="d-flex align-items-center mx-3 py-2">
-                                            <PersonCircle size={20} className="me-3" style={{ color: "#28a745" }} />
+                                            <Icons.PersonCircle size={20} className="me-3" style={{ color: "#28a745" }} />
                                             <span className="fw-medium">My Profile</span>
                                         </Nav.Link>
                                         <Nav.Link href="#orders" className="d-flex align-items-center mx-3 py-2">
-                                            <BagCheck size={20} className="me-3" />
+                                            <Icons.BagCheck size={20} className="me-3" />
                                             <span className="fw-medium">Orders</span>
                                         </Nav.Link>
                                         <Nav.Link onClick={handleLogout} className="d-flex align-items-center mx-3 py-2">
-                                            <BoxArrowRight size={20} className="me-3" />
+                                            <Icons.BoxArrowRight size={20} className="me-3" />
                                             <span className="fw-medium">Logout</span>
                                         </Nav.Link>
                                     </>
                                 ) : (
                                     <Nav.Link as={Link} to="/login" className="d-flex align-items-center mx-3 py-2">
-                                        <PersonCircle size={20} className="me-3" style={{ color: "#6c757d" }} />
+                                        <Icons.PersonCircle size={20} className="me-3" style={{ color: "#6c757d" }} />
                                         <span className="fw-medium">Login</span>
                                     </Nav.Link>
                                 )}

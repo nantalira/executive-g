@@ -44,8 +44,8 @@ const createAuthInterceptor = (client) => {
         async (error) => {
             const originalRequest = error.config;
 
-            // Jika error 401 (Unauthorized) dan bukan request refresh
-            if (error.response?.status === 401 && !originalRequest._retry && !originalRequest.url.includes("/refresh")) {
+            // Jika error 401 (Unauthorized) dan bukan request refresh atau login
+            if (error.response?.status === 401 && !originalRequest._retry && !originalRequest.url.includes("/refresh") && !originalRequest.url.includes("/login")) {
                 if (isRefreshing) {
                     // Jika sedang refresh, queue request ini
                     return new Promise((resolve, reject) => {

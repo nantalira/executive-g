@@ -15,7 +15,7 @@ return new class extends Migration
         Schema::create('flash_sales', function (Blueprint $table) {
             $table->id();
             $table->dateTime('start_date')->default(now()); // start_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-            $table->decimal('discount', 8, 2)->default(0.00);
+            $table->decimal('discount', 4, 2)->default(0.00);
             $table->dateTime('end_date')->default(now()->addHour(12)); // end_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP + INTERVAL 12 HOUR
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'));

@@ -17,6 +17,14 @@ class DatabaseSeeder extends Seeder
 
         $this->call([Province::class]);
         $this->call([UserSeeder::class]);
+        $this->call([CategorySeeder::class]);
+        $this->call([VariantSeeder::class]);
+        $this->call([FlashSaleSeeder::class]);
+        $this->call([ProductSeeder::class]);
+        $this->call([RatingSeeder::class]);
+        $this->call([CarouselSeeder::class]);
+        $this->call([CouponSeeder::class]);
+
         $sqlFiles = [
             database_path('seeders/districts.sql'),
             database_path('seeders/sub_districts.sql'),

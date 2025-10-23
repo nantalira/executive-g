@@ -95,4 +95,16 @@ class ResponseHelper
         }
         return self::success($message, 201);
     }
+
+    /**
+     * Unauthorized response
+     */
+    public static function unauthorized(string $message = 'Unauthorized'): JsonResponse
+    {
+        return response()->json([
+            'errors' => [
+                'message' => [$message]
+            ]
+        ], 401);
+    }
 }

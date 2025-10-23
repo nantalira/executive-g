@@ -45,6 +45,22 @@ class AuthService {
         const response = await authApi.get("/profile");
         return response.data;
     }
+
+    /**
+     * Update user profile
+     */
+    async updateProfile(profileData) {
+        const response = await authApi.put(`/profile`, profileData);
+        return response.data;
+    }
+
+    /**
+     * Change user password
+     */
+    async changePassword(passwordData) {
+        const response = await authApi.post(`/change-password`, passwordData);
+        return response.data;
+    }
 }
 
 export default new AuthService();

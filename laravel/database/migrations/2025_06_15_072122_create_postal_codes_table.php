@@ -19,7 +19,6 @@ return new class extends Migration
                 ->onUpdate('cascade') // FK → sub_districts.id
                 ->onDelete('restrict'); // FK → sub_districts.id
             $table->string('name', 100); // name VARCHAR(100) NOT NULL
-            $table->string('postal_code', 50)->nullable(); // postal_code VARCHAR(20) NULL
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'));
         });

@@ -17,6 +17,7 @@ class Address extends Model
         'fullname',
         'phone',
         'address',
+        'detail',
         'province',
         'district',
         'sub_district',
@@ -26,7 +27,7 @@ class Address extends Model
     ];
 
     protected $casts = [
-        'pinned' => 'boolean',
+        'pinned' => 'integer',
     ];
 
     public function user()

@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('fullname', 100); // name VARCHAR(100) NOT NULL
             $table->string('phone', 20); // phone VARCHAR(20) NOT NULL
             $table->string('address', 255); // address VARCHAR(255) NOT NULL
+            $table->string('detail', 255)->nullable(); // detail VARCHAR(255) NULL
             $table->string('province', 100); // province VARCHAR(100) NOT NULL
             $table->string('district', 100); // district VARCHAR(100) NOT NULL
             $table->string('sub_district', 100); // sub_district VARCHAR(100) NOT NULL

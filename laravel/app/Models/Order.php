@@ -15,17 +15,18 @@ class Order extends Model
     protected $fillable = [
         'user_id',
         'full_name',
-        'phone',
+        'phone_number',
         'address',
-        'detail',
+        'detail_address',
         'province',
         'district',
         'sub_district',
         'village',
         'postal_code',
-        'cupon_discount',
+        'coupon_discount',
+        'payment_method',
         'total_price',
-        'status', // 0: pending, 1: processing, 2: shipped, 3: completed, 4: cancelled
+        'status', // 0: pending, 1: shipped, 2: delivered
         'tracking_message',
     ];
 

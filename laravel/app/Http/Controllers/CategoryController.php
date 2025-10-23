@@ -18,17 +18,11 @@ class CategoryController extends Controller
     public function getAll(): JsonResponse
     {
         try {
-            $perPage = request()->query('items_per_page', 15); // Default to 15 items per page if not provided
-            $search = request()->query('search', '');
-            $query = Category::select('id', 'name');
+            $categories = Category::select('id', 'name', 'icon')
+                ->orderBy('id')
+                ->get();
 
-            if ($search) {
-                $query->where('name', 'like', "%{$search}%");
-            }
-
-            $categories = $query->paginate($perPage);
-
-            return ResponseHelper::successWithPagination('Categories retrieved successfully', $categories);
+            return ResponseHelper::successWithData('Categories retrieved successfully', $categories);
         } catch (Exception $e) {
             return ResponseHelper::error('Internal server error');
         }

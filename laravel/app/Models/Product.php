@@ -27,6 +27,23 @@ class Product extends Model
         'total_sold'
     ];
 
+    protected $appends = ['discounted_price'];
+
+    /**
+     * Get the discounted price
+     *
+     * @return int
+     */
+    public function getDiscountedPriceAttribute()
+    {
+        if ($this->discount <= 0) {
+            return $this->price;
+        }
+
+        $discountAmount = ($this->price * $this->discount) / 100;
+        return (int)($this->price - $discountAmount);
+    }
+
     public function category()
     {
         return $this->belongsTo(Category::class, 'category_id');

@@ -31,7 +31,7 @@ return new class extends Migration
             $table->string('name', 255); // name VARCHAR(255) NOT NULL
             $table->text('description')->nullable(); // description TEXT NULL
             $table->integer('price'); // price INT NOT NULL
-            $table->decimal('discount', 8, 2)->default(0.00); // discount DECIMAL(8,2) NOT NULL DEFAULT 0.00
+            $table->decimal('discount', 4, 2)->default(0.00); // discount DECIMAL(4,2) NOT NULL DEFAULT 0.00
             $table->integer('stock')->default(0); // stock INT NOT NULL DEFAULT 0
             $table->decimal('avg_rating', 3, 1)->default(0.00); // avg_rating DECIMAL(3,1) NOT NULL DEFAULT 0.00
             $table->integer('total_rating')->default(0); // total_ratings INT NOT NULL DEFAULT 0

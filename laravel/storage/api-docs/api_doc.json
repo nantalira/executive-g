@@ -15,6 +15,97 @@
         }
     ],
     "paths": {
+        "/health": {
+            "get": {
+                "summary": "Health check endpoint",
+                "tags": ["Unauthenticated", "System"],
+                "responses": {
+                    "200": {
+                        "description": "Success message response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SuccessWithDataResponse"
+                                },
+                                "example": {
+                                    "message": "API is running",
+                                    "data": {
+                                        "status": "ok",
+                                        "timestamp": "2025-10-20T10:30:00.000000Z",
+                                        "version": "1.0.0",
+                                        "environment": "local",
+                                        "laravel_version": "10.x"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/refresh": {
+            "post": {
+                "summary": "Refresh JWT token",
+                "tags": ["Unauthenticated", "Auth"],
+                "security": [],
+                "responses": {
+                    "200": {
+                        "description": "Success message response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SuccessMessageResponse"
+                                },
+                                "example": {
+                                    "message": "Token refreshed successfully"
+                                }
+                            }
+                        },
+                        "headers": {
+                            "Set-Cookie": {
+                                "description": "New JWT token set in cookie",
+                                "schema": {
+                                    "type": "string",
+                                    "example": "tokenjwt=new_jwt_token_here; HttpOnly; Secure; SameSite=Strict"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - Invalid or expired token",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                },
+                                "example": {
+                                    "errors": {
+                                        "message": [
+                                            "Token is invalid or expired"
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                },
+                                "example": {
+                                    "errors": {
+                                        "message": ["Internal server error"]
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/register": {
             "post": {
                 "summary": "Register a new user",
@@ -528,49 +619,28 @@
                 }
             }
         },
-        "/change-password/{user_id}": {
+        "/change-password": {
             "post": {
                 "summary": "Change password",
                 "tags": ["Authenticated", "Profile", "Auth"],
-                "parameters": [
-                    {
-                        "name": "user_id",
-                        "in": "path",
-                        "required": true,
-                        "description": "User ID",
-                        "schema": {
-                            "type": "integer",
-                            "example": 1
-                        }
-                    }
-                ],
                 "requestBody": {
                     "content": {
                         "application/json": {
                             "schema": {
                                 "type": "object",
                                 "properties": {
-                                    "old_password": {
+                                    "current_password": {
                                         "type": "string",
                                         "example": "password",
                                         "minLength": 6
                                     },
                                     "new_password": {
                                         "type": "string",
-                                        "example": "password",
-                                        "minLength": 6
-                                    },
-                                    "confirm_password": {
-                                        "type": "string",
-                                        "example": "password",
+                                        "example": "newpassword",
                                         "minLength": 6
                                     }
                                 },
-                                "required": [
-                                    "old_password",
-                                    "new_password",
-                                    "confirm_password"
-                                ]
+                                "required": ["current_password", "new_password"]
                             }
                         }
                     }
@@ -598,17 +668,13 @@
                                 },
                                 "example": {
                                     "errors": {
-                                        "old_password": [
-                                            "Old password is required",
-                                            "Old password is incorrect"
+                                        "current_password": [
+                                            "Current password is required",
+                                            "Current password is incorrect"
                                         ],
                                         "new_password": [
                                             "New password is required",
                                             "New password must be at least 6 characters"
-                                        ],
-                                        "confirm_password": [
-                                            "Confirm password is required",
-                                            "Password does not match"
                                         ]
                                     }
                                 }
@@ -633,7 +699,7 @@
                 }
             }
         },
-        "/carousel": {
+        "/carousels": {
             "get": {
                 "summary": "Get all carousel images",
                 "tags": ["Unauthenticated", "HomePage"],
@@ -730,133 +796,6 @@
                 }
             }
         },
-        "/products/flash-sale": {
-            "get": {
-                "summary": "Get all products in flash sale",
-                "parameters": [
-                    {
-                        "name": "page",
-                        "in": "query",
-                        "required": false,
-                        "description": "Page number (default 1)",
-                        "schema": {
-                            "type": "integer",
-                            "example": 1
-                        }
-                    },
-                    {
-                        "name": "items_per_page",
-                        "in": "query",
-                        "required": false,
-                        "description": "Items per page (default 15)",
-                        "schema": {
-                            "type": "integer",
-                            "example": 15
-                        }
-                    },
-                    {
-                        "name": "search",
-                        "in": "query",
-                        "required": false,
-                        "description": "Search by product name (default null)",
-                        "schema": {
-                            "type": "string",
-                            "example": ""
-                        }
-                    }
-                ],
-                "tags": ["Unauthenticated", "HomePage"],
-                "responses": {
-                    "200": {
-                        "description": "Success message response",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/SuccessWithPaginationResponse"
-                                },
-                                "example": {
-                                    "message": "Products fetched successfully",
-                                    "data": [
-                                        {
-                                            "id": 1,
-                                            "name": "Product 1",
-                                            "price": 100,
-                                            "discount": 0.1,
-                                            "avg_rating": 4.5,
-                                            "total_ratings": 100,
-                                            "sale_id": 1,
-                                            "product_image": {
-                                                "product_id": 1,
-                                                "name": "https://example.com/image1.jpg"
-                                            },
-                                            "sale": {
-                                                "id": 1,
-                                                "sale_discount": 0.1
-                                            }
-                                        },
-                                        {
-                                            "id": 2,
-                                            "name": "Product 2",
-                                            "price": 200,
-                                            "discount": 0.2,
-                                            "avg_rating": 4.0,
-                                            "total_ratings": 200,
-                                            "sale_id": 2,
-                                            "product_image": {
-                                                "product_id": 2,
-                                                "name": "https://example.com/image2.jpg"
-                                            },
-                                            "sale": {
-                                                "id": 2,
-                                                "sale_discount": 0.2
-                                            }
-                                        },
-                                        {
-                                            "id": 3,
-                                            "name": "Product 3",
-                                            "price": 300,
-                                            "discount": 0.3,
-                                            "avg_rating": 3.5,
-                                            "total_ratings": 300,
-                                            "sale_id": 3,
-                                            "product_image": {
-                                                "product_id": 3,
-                                                "name": "https://example.com/image3.jpg"
-                                            },
-                                            "sale": {
-                                                "id": 3,
-                                                "sale_discount": 0.3
-                                            }
-                                        }
-                                    ],
-                                    "pagination": {
-                                        "current_page": 1,
-                                        "total_pages": 1,
-                                        "total_items": 4,
-                                        "items_per_page": 15
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "internal Server Error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ApiErrorResponse"
-                                },
-                                "example": {
-                                    "errors": {
-                                        "message": ["Internal server error"]
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/products": {
             "get": {
                 "summary": "Get all products with filters",
@@ -903,13 +842,30 @@
                         }
                     },
                     {
-                        "name": "best_seller",
+                        "name": "filter",
                         "in": "query",
                         "required": false,
-                        "description": "Best seller (default false)",
+                        "description": "Filter products by: best_selling (sorts by total_sold desc), new_arrival (sorts by created_at desc), price_asc, price_desc, flash_sale (default null)",
                         "schema": {
-                            "type": "boolean",
-                            "example": false
+                            "type": "string",
+                            "enum": [
+                                "best_selling",
+                                "new_arrival",
+                                "price_asc",
+                                "price_desc",
+                                "flash_sale"
+                            ],
+                            "example": "best_selling"
+                        }
+                    },
+                    {
+                        "name": "flash_sale_id",
+                        "in": "query",
+                        "required": false,
+                        "description": "Flash sale ID (used with filter=flash_sale to get products from specific flash sale)",
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
                         }
                     }
                 ],
@@ -922,49 +878,41 @@
                                     "$ref": "#/components/schemas/SuccessWithPaginationResponse"
                                 },
                                 "example": {
-                                    "message": "Product fetched successfully",
+                                    "message": "Products retrieved successfully",
                                     "data": [
                                         {
                                             "id": 1,
-                                            "name": "Product 1",
-                                            "price": 100,
-                                            "discount": 0.1,
-                                            "product_image": {
-                                                "product_id": 1,
-                                                "name": "https://example.com/image1.jpg"
-                                            },
+                                            "name": "Gaming Laptop",
+                                            "price": "15000000",
+                                            "discount": "0.10",
+                                            "product_images": [
+                                                {
+                                                    "product_id": 1,
+                                                    "name": "https://example.com/storage/products/laptop1.jpg"
+                                                }
+                                            ],
                                             "avg_rating": 4.5,
-                                            "total_ratings": 100
+                                            "total_rating": 120
                                         },
                                         {
                                             "id": 2,
-                                            "name": "Product 2",
-                                            "price": 200,
-                                            "discount": 0.2,
-                                            "product_image": {
-                                                "product_id": 2,
-                                                "name": "https://example.com/image2.jpg"
-                                            },
-                                            "avg_rating": 4.0,
-                                            "total_ratings": 200
-                                        },
-                                        {
-                                            "id": 3,
-                                            "name": "Product 3",
-                                            "price": 300,
-                                            "discount": 0.3,
-                                            "product_image": {
-                                                "product_id": 3,
-                                                "name": "https://example.com/image3.jpg"
-                                            },
-                                            "avg_rating": 3.5,
-                                            "total_ratings": 300
+                                            "name": "Smartphone",
+                                            "price": "8000000",
+                                            "discount": "0.05",
+                                            "product_images": [
+                                                {
+                                                    "product_id": 2,
+                                                    "name": "https://example.com/storage/products/phone1.jpg"
+                                                }
+                                            ],
+                                            "avg_rating": 4.2,
+                                            "total_rating": 85
                                         }
                                     ],
                                     "pagination": {
                                         "current_page": 1,
                                         "total_pages": 1,
-                                        "total_items": 4,
+                                        "total_items": 2,
                                         "items_per_page": 15
                                     }
                                 }
@@ -972,16 +920,11 @@
                         }
                     },
                     "500": {
-                        "description": "internal Server Error",
+                        "description": "Internal Server Error",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/ApiErrorResponse"
-                                },
-                                "example": {
-                                    "errors": {
-                                        "message": ["Internal server error"]
-                                    }
                                 }
                             }
                         }
@@ -1014,14 +957,14 @@
                                     "$ref": "#/components/schemas/SuccessWithDataResponse"
                                 },
                                 "example": {
-                                    "message": "Product fetched successfully",
+                                    "message": "Product details retrieved successfully",
                                     "data": {
                                         "id": 1,
                                         "name": "Product 1",
                                         "price": 100,
                                         "discount": 0.1,
                                         "avg_rating": 4.5,
-                                        "total_ratings": 100,
+                                        "total_rating": 100,
                                         "stock": 100,
                                         "description": "Product description",
                                         "sale_id": 1,
@@ -1044,24 +987,32 @@
                                                 "pinned": 0
                                             }
                                         ],
+                                        "sale": {
+                                            "id": 1,
+                                            "sale_discount": "20.00",
+                                            "start_date": "2025-10-20T01:06:21.000000Z",
+                                            "end_date": "2025-10-21T04:35:31.000000Z"
+                                        },
                                         "category": {
                                             "id": 1,
                                             "name": "Category 1"
                                         },
-                                        "variant": {
-                                            "id": 1,
-                                            "name": "Variant 1",
-                                            "variant_options": [
-                                                {
-                                                    "id": 1,
-                                                    "name": "Option 1"
-                                                },
-                                                {
-                                                    "id": 2,
-                                                    "name": "Option 2"
-                                                }
-                                            ]
-                                        }
+                                        "variants": [
+                                            {
+                                                "id": 1,
+                                                "name": "Variant 1",
+                                                "variant_options": [
+                                                    {
+                                                        "variant_id": 1,
+                                                        "name": "Option 1"
+                                                    },
+                                                    {
+                                                        "variant_id": 1,
+                                                        "name": "Option 2"
+                                                    }
+                                                ]
+                                            }
+                                        ]
                                     }
                                 }
                             }
@@ -1115,86 +1066,55 @@
                 }
             }
         },
-        "/flash-sale": {
+        "/flash-sales/schedule": {
             "get": {
-                "summary": "Get all flash sale products",
+                "summary": "Get flash sales schedule (active and upcoming)",
                 "tags": ["Unauthenticated", "Flash Sale"],
-                "parameters": [
-                    {
-                        "name": "page",
-                        "in": "query",
-                        "required": false,
-                        "description": "Page number (default 1)",
-                        "schema": {
-                            "type": "integer",
-                            "example": 1
-                        }
-                    },
-                    {
-                        "name": "items_per_page",
-                        "in": "query",
-                        "required": false,
-                        "description": "Items per page (default 15)",
-                        "schema": {
-                            "type": "integer",
-                            "example": 15
-                        }
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "Success message response",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/SuccessWithPaginationResponse"
+                                    "$ref": "#/components/schemas/SuccessWithDataResponse"
                                 },
                                 "example": {
-                                    "message": "Flash sale products fetched successfully",
-                                    "data": [
-                                        {
-                                            "id": 1,
-                                            "start_date": "2021-01-01:00:00:00",
-                                            "end_date": "2021-01-07:12:00:00",
-                                            "products": [
-                                                {
-                                                    "id": 1,
-                                                    "name": "Product 1",
-                                                    "price": 100,
-                                                    "discount": 0.1,
-                                                    "avg_rating": 4.5,
-                                                    "total_ratings": 100,
-                                                    "sale_id": 1,
-                                                    "product_image": {
-                                                        "product_id": 1,
-                                                        "name": "https://example.com/image1.jpg"
-                                                    },
-                                                    "sale_discount": 0.1
-                                                }
-                                            ]
-                                        }
-                                    ],
-                                    "pagination": {
-                                        "current_page": 1,
-                                        "total_pages": 1,
-                                        "total_items": 1,
-                                        "items_per_page": 15
+                                    "message": "Flash sales schedule retrieved successfully",
+                                    "data": {
+                                        "server_time": "2025-10-20T10:30:00.000000Z",
+                                        "active": [
+                                            {
+                                                "id": 1,
+                                                "start_date": "2025-10-20 08:00:00",
+                                                "end_date": "2025-10-20 20:00:00",
+                                                "sale_discount": 0.25,
+                                                "status": "active",
+                                                "time_remaining_seconds": 34200,
+                                                "display_time": "8:00 AM - 8:00 PM"
+                                            }
+                                        ],
+                                        "upcoming": [
+                                            {
+                                                "id": 2,
+                                                "start_date": "2025-10-21 08:00:00",
+                                                "end_date": "2025-10-21 20:00:00",
+                                                "sale_discount": 0.3,
+                                                "status": "upcoming",
+                                                "starts_in_seconds": 77400,
+                                                "display_time": "8:00 AM - 8:00 PM"
+                                            }
+                                        ]
                                     }
                                 }
                             }
                         }
                     },
                     "500": {
-                        "description": "internal Server Error",
+                        "description": "Internal Server Error",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/ApiErrorResponse"
-                                },
-                                "example": {
-                                    "errors": {
-                                        "message": ["Internal server error"]
-                                    }
                                 }
                             }
                         }
@@ -1202,19 +1122,30 @@
                 }
             }
         },
-        "/flash-sale/{id}": {
+        "/flash-sales/product": {
             "get": {
-                "summary": "Get flash sale by ID",
-                "tags": ["Unauthenticated", "Flash Sale"],
+                "summary": "Get active flash sale with products",
+                "tags": ["Unauthenticated", "Flash Sale", "HomePage"],
                 "parameters": [
                     {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "description": "Flash sale ID",
+                        "name": "items_per_page",
+                        "in": "query",
+                        "required": false,
+                        "description": "Number of products per page",
                         "schema": {
                             "type": "integer",
-                            "example": 1
+                            "example": 15,
+                            "default": 15
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "required": false,
+                        "description": "Search products by name",
+                        "schema": {
+                            "type": "string",
+                            "example": "laptop"
                         }
                     }
                 ],
@@ -1227,59 +1158,49 @@
                                     "$ref": "#/components/schemas/SuccessWithDataResponse"
                                 },
                                 "example": {
-                                    "message": "Flash sale retrieved successfully",
+                                    "message": "Active flash sale with products retrieved successfully",
                                     "data": {
-                                        "id": 1,
-                                        "start_date": "2021-01-01:00:00:00",
-                                        "end_date": "2021-01-07:12:00:00",
-                                        "sale_discount": 0.1,
-                                        "status": "active"
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Field error response",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/FieldErrorResponse"
-                                },
-                                "example": {
-                                    "errors": {
-                                        "id": ["Flash sale ID is required"]
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found error response",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ApiErrorResponse"
-                                },
-                                "example": {
-                                    "errors": {
-                                        "message": ["Flash sale not found"]
+                                        "flash_sale": {
+                                            "id": 1,
+                                            "start_date": "2025-10-20 08:00:00",
+                                            "end_date": "2025-10-20 20:00:00",
+                                            "sale_discount": 0.25
+                                        },
+                                        "products": {
+                                            "data": [
+                                                {
+                                                    "id": 1,
+                                                    "name": "Gaming Laptop",
+                                                    "price": "15000000",
+                                                    "discount": "0.10",
+                                                    "avg_rating": 4.5,
+                                                    "total_rating": 120,
+                                                    "product_images": [
+                                                        {
+                                                            "product_id": 1,
+                                                            "name": "https://example.com/storage/products/laptop1.jpg"
+                                                        }
+                                                    ]
+                                                }
+                                            ],
+                                            "pagination": {
+                                                "current_page": 1,
+                                                "total_pages": 3,
+                                                "total_items": 45,
+                                                "items_per_page": 15
+                                            }
+                                        }
                                     }
                                 }
                             }
                         }
                     },
                     "500": {
-                        "description": "internal Server Error",
+                        "description": "Internal Server Error",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/ApiErrorResponse"
-                                },
-                                "example": {
-                                    "errors": {
-                                        "message": ["Internal server error"]
-                                    }
                                 }
                             }
                         }
@@ -1301,6 +1222,16 @@
                             "type": "integer",
                             "example": 1
                         }
+                    },
+                    {
+                        "name": "items_per_page",
+                        "in": "query",
+                        "required": false,
+                        "description": "Number of reviews per page (default 15)",
+                        "schema": {
+                            "type": "integer",
+                            "example": 15
+                        }
                     }
                 ],
                 "responses": {
@@ -1316,42 +1247,48 @@
                                     "data": [
                                         {
                                             "id": 1,
-                                            "user": "User 1",
-                                            "rating": 4.5,
-                                            "comment": "Review comment",
-                                            "created_at": "2021-01-01:00:00:00",
-                                            "product_image": {
-                                                "product_id": 1,
-                                                "name": "https://example.com/image1.jpg"
+                                            "product_id": 1,
+                                            "user_id": 1,
+                                            "rating": 4,
+                                            "comment": "Great product! Highly recommended.",
+                                            "image": null,
+                                            "created_at": "2025-09-26T03:52:41.000000Z",
+                                            "user": {
+                                                "id": 1,
+                                                "name": "John Doe"
                                             }
                                         },
                                         {
                                             "id": 2,
-                                            "user": "User 2",
-                                            "rating": 4.0,
-                                            "comment": "Review comment",
-                                            "created_at": "2021-01-02:00:00:00",
-                                            "product_image": {
-                                                "product_id": 2,
-                                                "name": "https://example.com/image2.jpg"
+                                            "product_id": 1,
+                                            "user_id": 2,
+                                            "rating": 5,
+                                            "comment": "Excellent quality and fast delivery.",
+                                            "image": "https://example.com/review-image.jpg",
+                                            "created_at": "2025-09-24T15:44:09.000000Z",
+                                            "user": {
+                                                "id": 2,
+                                                "name": "Jane Smith"
                                             }
                                         },
                                         {
                                             "id": 3,
-                                            "user": "User 3",
-                                            "rating": 3.5,
-                                            "comment": "Review comment",
-                                            "created_at": "2021-01-03:00:00:00",
-                                            "product_image": {
-                                                "product_id": 3,
-                                                "name": "https://example.com/image3.jpg"
+                                            "product_id": 1,
+                                            "user_id": 3,
+                                            "rating": 3,
+                                            "comment": "Average product, met basic expectations.",
+                                            "image": null,
+                                            "created_at": "2025-08-25T13:20:43.000000Z",
+                                            "user": {
+                                                "id": 3,
+                                                "name": "Bob Johnson"
                                             }
                                         }
                                     ],
                                     "pagination": {
                                         "current_page": 1,
                                         "total_pages": 1,
-                                        "total_items": 4,
+                                        "total_items": 13,
                                         "items_per_page": 15
                                     }
                                 }
@@ -1420,38 +1357,24 @@
                                         "type": "integer",
                                         "example": 1
                                     },
-                                    "user_id": {
-                                        "type": "integer",
-                                        "example": 1
-                                    },
                                     "rating": {
                                         "type": "integer",
+                                        "minimum": 1,
+                                        "maximum": 5,
                                         "example": 4
                                     },
                                     "comment": {
                                         "type": "string",
-                                        "example": "Review comment"
+                                        "example": "Great product! Highly recommended."
                                     },
-                                    "product_image": {
-                                        "type": "object",
-                                        "properties": {
-                                            "product_id": {
-                                                "type": "integer",
-                                                "example": 1
-                                            },
-                                            "name": {
-                                                "type": "string",
-                                                "example": "https://example.com/image.jpg"
-                                            }
-                                        }
+                                    "image": {
+                                        "type": "string",
+                                        "format": "binary",
+                                        "description": "Review image file (optional)",
+                                        "nullable": true
                                     }
                                 },
-                                "required": [
-                                    "rating",
-                                    "comment",
-                                    "product_id",
-                                    "user_id"
-                                ]
+                                "required": ["product_id", "rating", "comment"]
                             }
                         }
                     }
@@ -1482,8 +1405,10 @@
                                         "product_id": [
                                             "Product ID is required"
                                         ],
-                                        "user_id": ["User ID is required"],
-                                        "rating": ["Rating is required"],
+                                        "rating": [
+                                            "Rating is required",
+                                            "Rating must be between 1 and 5"
+                                        ],
                                         "comment": ["Comment is required"]
                                     }
                                 }
@@ -1523,22 +1448,10 @@
                 }
             }
         },
-        "/carts/{user_id}": {
+        "/carts": {
             "get": {
                 "summary": "Get all products in cart",
                 "tags": ["Authenticated", "Cart"],
-                "parameters": [
-                    {
-                        "name": "user_id",
-                        "in": "path",
-                        "required": true,
-                        "description": "User ID",
-                        "schema": {
-                            "type": "integer",
-                            "example": 1
-                        }
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "Success message response",
@@ -1556,10 +1469,16 @@
                                                 "product_id": 1,
                                                 "name": "https://example.com/image1.jpg"
                                             },
-                                            "product_name": "Product 1",
-                                            "product_price": 100,
-                                            "quantity": 1,
-                                            "total_price": 100
+                                            "name": "Product 1",
+                                            "price": 100,
+                                            "discount": 0.1,
+                                            "quantity": 2,
+                                            "discounted_price": 90,
+                                            "sale_id": 1,
+                                            "sale": {
+                                                "id": 1,
+                                                "sale_discount": "20.00"
+                                            }
                                         },
                                         {
                                             "id": 2,
@@ -1567,23 +1486,21 @@
                                                 "product_id": 2,
                                                 "name": "https://example.com/image2.jpg"
                                             },
-                                            "product_name": "Product 2",
-                                            "product_price": 200,
-                                            "quantity": 2,
-                                            "total_price": 400
-                                        },
-                                        {
-                                            "id": 3,
-                                            "product_image": {
-                                                "product_id": 3,
-                                                "name": "https://example.com/image3.jpg"
-                                            },
-                                            "product_name": "Product 3",
-                                            "product_price": 300,
-                                            "quantity": 3,
-                                            "total_price": 900
+                                            "name": "Product 2",
+                                            "price": 200,
+                                            "discount": 0.15,
+                                            "quantity": 1,
+                                            "discounted_price": 170,
+                                            "sale_id": null,
+                                            "sale": null
                                         }
-                                    ]
+                                    ],
+                                    "pagination": {
+                                        "current_page": 1,
+                                        "total_pages": 1,
+                                        "total_items": 2,
+                                        "items_per_page": 15
+                                    }
                                 }
                             }
                         }
@@ -1638,18 +1555,6 @@
             "post": {
                 "summary": "Add product to cart",
                 "tags": ["Authenticated", "Cart", "Product Details"],
-                "parameters": [
-                    {
-                        "name": "user_id",
-                        "in": "path",
-                        "required": true,
-                        "description": "User ID",
-                        "schema": {
-                            "type": "integer",
-                            "example": 1
-                        }
-                    }
-                ],
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -1923,31 +1828,30 @@
                             "schema": {
                                 "type": "object",
                                 "properties": {
-                                    "user_id": {
-                                        "type": "integer",
-                                        "example": 1
-                                    },
                                     "product_ids": {
                                         "type": "array",
                                         "items": {
                                             "type": "integer"
-                                        }
+                                        },
+                                        "example": [1, 2, 3]
                                     },
                                     "quantities": {
                                         "type": "array",
                                         "items": {
                                             "type": "integer"
-                                        }
+                                        },
+                                        "example": [2, 1, 3]
                                     },
-                                    "cupon_discount": {
-                                        "type": "integer",
-                                        "example": 0.4
+                                    "coupon_discount": {
+                                        "type": "number",
+                                        "example": 0.1,
+                                        "description": "Coupon discount as decimal (0.1 = 10%)"
                                     },
-                                    "fullname": {
+                                    "full_name": {
                                         "type": "string",
                                         "example": "John Doe"
                                     },
-                                    "phone": {
+                                    "phone_number": {
                                         "type": "string",
                                         "example": "1234567890"
                                     },
@@ -1955,9 +1859,10 @@
                                         "type": "string",
                                         "example": "123, Street, City, State, Country"
                                     },
-                                    "detail": {
+                                    "detail_address": {
                                         "type": "string",
-                                        "example": "Order detail"
+                                        "example": "Near the mall, 2nd floor",
+                                        "nullable": true
                                     },
                                     "province": {
                                         "type": "string",
@@ -1971,29 +1876,41 @@
                                         "type": "string",
                                         "example": "Sub District"
                                     },
+                                    "village": {
+                                        "type": "string",
+                                        "example": "Village"
+                                    },
                                     "postal_code": {
                                         "type": "string",
                                         "example": "123456"
                                     },
+                                    "payment_method": {
+                                        "type": "string",
+                                        "example": "cash",
+                                        "enum": [
+                                            "cash",
+                                            "credit_card",
+                                            "bank_transfer"
+                                        ]
+                                    },
                                     "total_price": {
                                         "type": "number",
-                                        "example": 100
+                                        "example": 150000
                                     }
                                 },
                                 "required": [
-                                    "user_id",
                                     "product_ids",
                                     "quantities",
                                     "total_price",
-                                    "discount",
-                                    "fullname",
-                                    "phone",
+                                    "full_name",
+                                    "phone_number",
                                     "address",
-                                    "detail",
                                     "province",
                                     "district",
                                     "sub_district",
-                                    "postal_code"
+                                    "village",
+                                    "postal_code",
+                                    "payment_method"
                                 ]
                             }
                         }
@@ -2060,123 +1977,20 @@
                         }
                     }
                 }
-            }
-        },
-        "/cupon_check/{code}/{total_price}": {
+            },
             "get": {
-                "summary": "Check cupon code",
-                "tags": ["Authenticated", "Orders"],
-                "parameters": [
-                    {
-                        "name": "code",
-                        "in": "path",
-                        "required": true,
-                        "description": "Cupon code",
-                        "schema": {
-                            "type": "string",
-                            "example": "Cupon code"
-                        }
-                    },
-                    {
-                        "name": "total_price",
-                        "in": "path",
-                        "required": true,
-                        "description": "Total price",
-                        "schema": {
-                            "type": "number",
-                            "example": 100
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Success message response",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/SuccessWithDataResponse"
-                                },
-                                "example": {
-                                    "message": "Cupon code is valid",
-                                    "data": {
-                                        "id": 1,
-                                        "discount": 0.1
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Field error response",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/FieldErrorResponse"
-                                },
-                                "example": {
-                                    "errors": {
-                                        "code": ["Cupon code is required"]
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found error response",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ApiErrorResponse"
-                                },
-                                "example": {
-                                    "errors": {
-                                        "message": ["Cupon code is invalid"]
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "internal Server Error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ApiErrorResponse"
-                                },
-                                "example": {
-                                    "errors": {
-                                        "message": ["Internal server error"]
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/orders/{user_id}": {
-            "get": {
-                "summary": "Get all orders of a user",
+                "summary": "Get all orders of authenticated user",
                 "tags": ["Authenticated", "Orders"],
                 "parameters": [
                     {
                         "name": "status",
                         "in": "query",
-                        "required": true,
-                        "description": "Order status ( 0 = pending, 1 = shipped, 2 = delivered)",
+                        "required": false,
+                        "description": "Order status filter: 0 = pending/process, 1 = shipped/deliveries, 2 = delivered",
                         "schema": {
                             "type": "integer",
-                            "example": 1
-                        }
-                    },
-                    {
-                        "name": "user_id",
-                        "in": "query",
-                        "required": true,
-                        "description": "User ID",
-                        "schema": {
-                            "type": "integer",
-                            "example": 1
+                            "example": 1,
+                            "enum": [0, 1, 2]
                         }
                     }
                 ],
@@ -2194,142 +2008,44 @@
                                         {
                                             "id": 1,
                                             "tracking_message": "Order placed",
-                                            "tracking_date": "2021-01-01:00:00:00",
-                                            "products": [
+                                            "created_at": "2025-10-20T10:30:00.000000Z",
+                                            "status": 0,
+                                            "total_price": 150000,
+                                            "coupon_discount": 0.1,
+                                            "payment_method": "cash",
+                                            "order_details": [
                                                 {
                                                     "id": 1,
-                                                    "name": "Product 1",
-                                                    "price": 100,
-                                                    "discount": 0.1,
-                                                    "product_image": {
-                                                        "product_id": 1,
-                                                        "name": "https://example.com/image1.jpg"
-                                                    },
-                                                    "quantity": 1,
-                                                    "total_price": 100
-                                                },
-                                                {
-                                                    "id": 2,
-                                                    "name": "Product 2",
-                                                    "price": 200,
-                                                    "discount": 0.2,
-                                                    "product_image": {
-                                                        "product_id": 2,
-                                                        "name": "https://example.com/image2.jpg"
-                                                    },
                                                     "quantity": 2,
-                                                    "total_price": 400
-                                                },
-                                                {
-                                                    "id": 3,
-                                                    "name": "Product 3",
-                                                    "price": 300,
-                                                    "discount": 0.3,
-                                                    "product_image": {
-                                                        "product_id": 3,
-                                                        "name": "https://example.com/image3.jpg"
-                                                    },
-                                                    "quantity": 3,
-                                                    "total_price": 900
+                                                    "total_price": 100000,
+                                                    "product": {
+                                                        "id": 1,
+                                                        "name": "Product 1",
+                                                        "price": 50000,
+                                                        "discount": 0.1,
+                                                        "product_images": [
+                                                            {
+                                                                "product_id": 1,
+                                                                "name": "https://example.com/image1.jpg"
+                                                            }
+                                                        ]
+                                                    }
                                                 }
-                                            ],
-                                            "total_price": 1400,
-                                            "discount": 0.1
-                                        },
-                                        {
-                                            "id": 2,
-                                            "tracking_message": "Order shipped",
-                                            "tracking_date": "2021-01-01:00:00:00",
-                                            "products": [
-                                                {
-                                                    "id": 4,
-                                                    "name": "Product 4",
-                                                    "price": 400,
-                                                    "discount": 0.4,
-                                                    "product_image": {
-                                                        "product_id": 4,
-                                                        "name": "https://example.com/image4.jpg"
-                                                    },
-                                                    "quantity": 4,
-                                                    "total_price": 1600
-                                                },
-                                                {
-                                                    "id": 5,
-                                                    "name": "Product 5",
-                                                    "price": 500,
-                                                    "discount": 0.5,
-                                                    "product_image": {
-                                                        "product_id": 5,
-                                                        "name": "https://example.com/image5.jpg"
-                                                    },
-                                                    "quantity": 5,
-                                                    "total_price": 2500
-                                                },
-                                                {
-                                                    "id": 6,
-                                                    "name": "Product 6",
-                                                    "price": 600,
-                                                    "discount": 0.6,
-                                                    "product_image": {
-                                                        "product_id": 6,
-                                                        "name": "https://example.com/image6.jpg"
-                                                    },
-                                                    "quantity": 6,
-                                                    "total_price": 3600
-                                                }
-                                            ],
-                                            "total_price": 7700,
-                                            "discount": 0.2
-                                        },
-                                        {
-                                            "id": 3,
-                                            "tracking_message": "Order delivered",
-                                            "tracking_date": "2021-01-01:00:00:00",
-                                            "products": [
-                                                {
-                                                    "id": 7,
-                                                    "name": "Product 7",
-                                                    "price": 700,
-                                                    "discount": 0.7,
-                                                    "product_image": {
-                                                        "product_id": 7,
-                                                        "name": "https://example.com/image7.jpg"
-                                                    },
-                                                    "quantity": 7,
-                                                    "total_price": 4900
-                                                }
-                                            ],
-                                            "total_price": 4900,
-                                            "discount": 0.3
+                                            ]
                                         }
                                     ],
                                     "pagination": {
                                         "current_page": 1,
                                         "total_pages": 1,
-                                        "total_items": 4,
+                                        "total_items": 1,
                                         "items_per_page": 15
                                     }
                                 }
                             }
                         }
                     },
-                    "400": {
-                        "description": "Field error response",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/FieldErrorResponse"
-                                },
-                                "example": {
-                                    "errors": {
-                                        "user_id": ["User ID is required"]
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found error response",
+                    "500": {
+                        "description": "Internal Server Error",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -2337,14 +2053,266 @@
                                 },
                                 "example": {
                                     "errors": {
-                                        "message": ["Orders not found"]
+                                        "message": ["Internal server error"]
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/coupons/check/{code}": {
+            "get": {
+                "summary": "Validate coupon code and calculate discount",
+                "tags": ["Unauthenticated", "Orders"],
+                "parameters": [
+                    {
+                        "name": "code",
+                        "in": "path",
+                        "required": true,
+                        "description": "Coupon code",
+                        "schema": {
+                            "type": "string",
+                            "example": "DISCOUNT10"
+                        }
+                    },
+                    {
+                        "name": "total_price",
+                        "in": "query",
+                        "required": true,
+                        "description": "Total cart price for minimum purchase validation",
+                        "schema": {
+                            "type": "number",
+                            "minimum": 0,
+                            "example": 150000
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success message response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SuccessWithDataResponse"
+                                },
+                                "example": {
+                                    "message": "Coupon code is valid",
+                                    "data": {
+                                        "id": 1,
+                                        "code": "DISCOUNT10",
+                                        "name": "10% Discount",
+                                        "type": "percentage",
+                                        "value": 10,
+                                        "minimum_purchase": 100000,
+                                        "discount_amount": 15000,
+                                        "final_total": 135000
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - Minimum purchase not met or validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                },
+                                "examples": {
+                                    "minimum_not_met": {
+                                        "value": {
+                                            "errors": {
+                                                "message": [
+                                                    "Minimum purchase of Rp100,000 required"
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "validation_error": {
+                                        "value": {
+                                            "errors": {
+                                                "total_price": [
+                                                    "Total price is required"
+                                                ]
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Coupon not found or expired",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                },
+                                "example": {
+                                    "errors": {
+                                        "message": [
+                                            "Coupon code is invalid or expired"
+                                        ]
                                     }
                                 }
                             }
                         }
                     },
                     "500": {
-                        "description": "internal Server Error",
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                },
+                                "example": {
+                                    "errors": {
+                                        "message": ["Internal server error"]
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/coupons/apply": {
+            "post": {
+                "summary": "Apply coupon to cart/order",
+                "tags": ["Authenticated", "Orders"],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "coupon_code": {
+                                        "type": "string",
+                                        "description": "Coupon code to apply",
+                                        "example": "DISCOUNT10"
+                                    },
+                                    "total_price": {
+                                        "type": "number",
+                                        "description": "Total cart price",
+                                        "minimum": 0,
+                                        "example": 150000
+                                    },
+                                    "cart_items": {
+                                        "type": "array",
+                                        "description": "Array of cart items",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "product_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "quantity": {
+                                                    "type": "integer",
+                                                    "example": 2
+                                                },
+                                                "price": {
+                                                    "type": "number",
+                                                    "example": 75000
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                "required": [
+                                    "coupon_code",
+                                    "total_price",
+                                    "cart_items"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success message response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SuccessWithDataResponse"
+                                },
+                                "example": {
+                                    "message": "Coupon applied successfully",
+                                    "data": {
+                                        "coupon_id": 1,
+                                        "coupon_code": "DISCOUNT10",
+                                        "discount_amount": 15000,
+                                        "original_total": 150000,
+                                        "final_total": 135000,
+                                        "usage_id": 123
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - Validation error or coupon cannot be applied",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                },
+                                "examples": {
+                                    "minimum_not_met": {
+                                        "value": {
+                                            "errors": {
+                                                "message": [
+                                                    "Minimum purchase of Rp100,000 required"
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "usage_limit_exceeded": {
+                                        "value": {
+                                            "errors": {
+                                                "message": [
+                                                    "Coupon usage limit exceeded"
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "validation_error": {
+                                        "value": {
+                                            "errors": {
+                                                "coupon_code": [
+                                                    "Coupon code is required"
+                                                ],
+                                                "total_price": [
+                                                    "Total price is required"
+                                                ]
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Coupon not found or expired",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                },
+                                "example": {
+                                    "errors": {
+                                        "message": [
+                                            "Coupon code is invalid or expired"
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -2420,18 +2388,6 @@
             "put": {
                 "summary": "Update user profile",
                 "tags": ["Authenticated", "Profile"],
-                "parameters": [
-                    {
-                        "name": "user_id",
-                        "in": "path",
-                        "required": true,
-                        "description": "User ID",
-                        "schema": {
-                            "type": "integer",
-                            "example": 1
-                        }
-                    }
-                ],
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -2519,22 +2475,10 @@
                 }
             }
         },
-        "/addresses/{user_id}": {
+        "/addresses": {
             "get": {
                 "summary": "Get all addresses of a user",
                 "tags": ["Authenticated", "Address"],
-                "parameters": [
-                    {
-                        "name": "user_id",
-                        "in": "path",
-                        "required": true,
-                        "description": "User ID",
-                        "schema": {
-                            "type": "integer",
-                            "example": 1
-                        }
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "Success message response",
@@ -2555,6 +2499,7 @@
                                             "province": "Province",
                                             "district": "District",
                                             "sub_district": "Sub District",
+                                            "village": "Village",
                                             "postal_code": "12345",
                                             "pinned": 1
                                         },
@@ -2567,6 +2512,7 @@
                                             "province": "Province",
                                             "district": "District",
                                             "sub_district": "Sub District",
+                                            "village": "Village",
                                             "postal_code": "12345",
                                             "pinned": 0
                                         },
@@ -2579,6 +2525,7 @@
                                             "province": "Province",
                                             "district": "District",
                                             "sub_district": "Sub District",
+                                            "village": "Village",
                                             "postal_code": "12345",
                                             "pinned": 0
                                         }
@@ -2637,18 +2584,6 @@
             "post": {
                 "summary": "Add address to user",
                 "tags": ["Authenticated", "Address"],
-                "parameters": [
-                    {
-                        "name": "user_id",
-                        "in": "path",
-                        "required": true,
-                        "description": "User ID",
-                        "schema": {
-                            "type": "integer",
-                            "example": 1
-                        }
-                    }
-                ],
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -2683,6 +2618,10 @@
                                         "type": "string",
                                         "example": "Sub District"
                                     },
+                                    "village": {
+                                        "type": "string",
+                                        "example": "Village"
+                                    },
                                     "postal_code": {
                                         "type": "string",
                                         "example": "12345"
@@ -2699,6 +2638,7 @@
                                     "province",
                                     "district",
                                     "sub_district",
+                                    "village",
                                     "postal_code"
                                 ]
                             }
@@ -2736,6 +2676,7 @@
                                         "sub_district": [
                                             "Sub District is required"
                                         ],
+                                        "village": ["Village is required"],
                                         "postal_code": [
                                             "Postal code is required"
                                         ]
@@ -2777,22 +2718,10 @@
                 }
             }
         },
-        "/addresses/{user_id}/pinned": {
+        "/addresses/pinned": {
             "get": {
                 "summary": "Get pinned address of a user",
                 "tags": ["Authenticated", "Address"],
-                "parameters": [
-                    {
-                        "name": "user_id",
-                        "in": "path",
-                        "required": true,
-                        "description": "User ID",
-                        "schema": {
-                            "type": "integer",
-                            "example": 1
-                        }
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "Success message response",
@@ -2812,6 +2741,7 @@
                                         "province": "Province",
                                         "district": "District",
                                         "sub_district": "Sub District",
+                                        "village": "Village",
                                         "postal_code": "12345"
                                     }
                                 }
@@ -2996,6 +2926,10 @@
                                         "type": "string",
                                         "example": "12345"
                                     },
+                                    "village": {
+                                        "type": "string",
+                                        "example": "Village"
+                                    },
                                     "pinned": {
                                         "type": "integer",
                                         "example": 1
@@ -3008,6 +2942,7 @@
                                     "province",
                                     "district",
                                     "sub_district",
+                                    "village",
                                     "postal_code"
                                 ]
                             }
@@ -3047,7 +2982,8 @@
                                         ],
                                         "postal_code": [
                                             "Postal code is required"
-                                        ]
+                                        ],
+                                        "village": ["Village is required"]
                                     }
                                 }
                             }
@@ -3119,6 +3055,7 @@
                                         "province": "Province",
                                         "district": "District",
                                         "sub_district": "Sub District",
+                                        "village": "Village",
                                         "postal_code": "12345"
                                     }
                                 }
@@ -3302,7 +3239,7 @@
                 }
             }
         },
-        "/sub_districts/{district_id}": {
+        "/sub-districts/{district_id}": {
             "get": {
                 "summary": "Get all sub districts of a district",
                 "tags": ["Master Data"],
@@ -3381,9 +3318,9 @@
                 }
             }
         },
-        "/postalcodes/{sub_district_id}": {
+        "/villages/{sub_district_id}": {
             "get": {
-                "summary": "Get all postal codes of a sub district",
+                "summary": "Get all villages of a sub district",
                 "tags": ["Master Data"],
                 "parameters": [
                     {
@@ -3406,19 +3343,19 @@
                                     "$ref": "#/components/schemas/SuccessWithPaginationResponse"
                                 },
                                 "example": {
-                                    "message": "Postal Codes fetched successfully",
+                                    "message": "Villages fetched successfully",
                                     "data": [
                                         {
                                             "id": 1,
-                                            "code": "12345"
+                                            "name": "Village 1"
                                         },
                                         {
                                             "id": 2,
-                                            "code": "12346"
+                                            "name": "Village 2"
                                         },
                                         {
                                             "id": 3,
-                                            "code": "12347"
+                                            "name": "Village 3"
                                         }
                                     ]
                                 }
@@ -3466,34 +3403,46 @@
                 "tags": ["Master Data"],
                 "responses": {
                     "200": {
-                        "description": "Success message response",
+                        "description": "Success with data response",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/SuccessWithPaginationResponse"
+                                    "$ref": "#/components/schemas/SuccessWithDataResponse"
                                 },
                                 "example": {
-                                    "message": "Categories fetched successfully",
+                                    "message": "Categories retrieved successfully",
                                     "data": [
                                         {
                                             "id": 1,
-                                            "name": "Category 1"
+                                            "name": "Phones",
+                                            "icon": "Phone"
                                         },
                                         {
                                             "id": 2,
-                                            "name": "Category 2"
+                                            "name": "Computers",
+                                            "icon": "Laptop"
                                         },
                                         {
                                             "id": 3,
-                                            "name": "Category 3"
+                                            "name": "SmartWatch",
+                                            "icon": "Watch"
+                                        },
+                                        {
+                                            "id": 4,
+                                            "name": "Camera",
+                                            "icon": "Camera"
+                                        },
+                                        {
+                                            "id": 5,
+                                            "name": "HeadPhones",
+                                            "icon": "Headset"
+                                        },
+                                        {
+                                            "id": 6,
+                                            "name": "Gaming",
+                                            "icon": "Joystick"
                                         }
-                                    ],
-                                    "pagination": {
-                                        "current_page": 1,
-                                        "total_pages": 1,
-                                        "total_items": 3,
-                                        "items_per_page": 15
-                                    }
+                                    ]
                                 }
                             }
                         }

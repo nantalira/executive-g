@@ -24,8 +24,7 @@ class LocationController extends Controller
             $perPage = request()->query('items_per_page', 15); // Default to 15 items per page if not provided
             $search = request()->query('search', '');
 
-            $query = Province::select('id', 'name')
-                ->orderBy('name', 'asc');
+            $query = Province::select('id', 'name');
 
             if ($search) {
                 $query->where('name', 'like', "%{$search}%");
@@ -52,13 +51,13 @@ class LocationController extends Controller
             $search = request()->query('search', '');
 
             $query = District::where('province_id', $provinceId)
-                ->select('id', 'province_id', 'name');
+                ->select('id', 'name');
 
             if ($search) {
                 $query->where('name', 'like', "%{$search}%");
             }
 
-            $districts = $query->orderBy('name', 'asc')->paginate($perPage);
+            $districts = $query->paginate($perPage);
 
             return ResponseHelper::successWithPagination('Districts retrieved successfully', $districts);
         } catch (Exception $e) {
@@ -79,13 +78,13 @@ class LocationController extends Controller
             $search = request()->query('search', '');
 
             $query = SubDistrict::where('district_id', $districtId)
-                ->select('id', 'district_id', 'name');
+                ->select('id', 'name');
 
             if ($search) {
                 $query->where('name', 'like', "%{$search}%");
             }
 
-            $subDistricts = $query->orderBy('name', 'asc')->paginate($perPage);
+            $subDistricts = $query->paginate($perPage);
 
             return ResponseHelper::successWithPagination('Sub districts retrieved successfully', $subDistricts);
         } catch (Exception $e) {
@@ -99,23 +98,22 @@ class LocationController extends Controller
      * @param int $subDistrictId
      * @return JsonResponse
      */
-    public function postalCodes(int $subDistrictId): JsonResponse
+    public function villages(int $subDistrictId): JsonResponse
     {
         try {
             $perPage = request()->query('items_per_page', 15);
             $search = request()->query('search', '');
 
             $query = Villages::where('sub_district_id', $subDistrictId)
-                ->select('id', 'sub_district_id', 'name', 'postal_code');
+                ->select('id', 'name');
 
             if ($search) {
-                $query->where('name', 'like', "%{$search}%")
-                    ->orWhere('postal_code', 'like', "%{$search}%");
+                $query->where('name', 'like', "%{$search}%");
             }
 
-            $postalCodes = $query->orderBy('name', 'asc')->paginate($perPage);
+            $villages = $query->orderBy('name', 'asc')->paginate($perPage);
 
-            return ResponseHelper::successWithPagination('Postal codes retrieved successfully', $postalCodes);
+            return ResponseHelper::successWithPagination('Villages retrieved successfully', $villages);
         } catch (Exception $e) {
             return ResponseHelper::error($e->getMessage() ?: 'Internal server error');
         }
