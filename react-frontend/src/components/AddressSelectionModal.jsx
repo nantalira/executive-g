@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Modal, Button, Card, Row, Col, Spinner, Alert, Form } from "react-bootstrap";
-import addressService from "../services/addressService";
+import AddressService from "../services/AddressService";
 
 const AddressSelectionModal = ({ show, onHide, onAddressSelect }) => {
     const [addresses, setAddresses] = useState([]);

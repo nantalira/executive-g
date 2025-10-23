@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Container, Row, Col, Card, Nav, Collapse } from "react-bootstrap";
 import { ChevronDown, ChevronRight } from "react-bootstrap-icons";
 import { Link, Outlet, useNavigate, useLocation } from "react-router-dom";
-import AuthService from "../services/authService";
+import AuthService from "../services/AuthService";
 import MainLayout from "./MainLayout";
 import LoadingOverlay from "../components/LoadingOverlay";
 import { useApiErrorHandler } from "../hooks/useApiErrorHandler";
@@ -19,7 +19,8 @@ const ProfileLayout = () => {
     const fetchProfile = async () => {
         try {
             setLoading(true);
-            const response = await AuthService.getProfile();
+            const authService = new AuthService();
+            const response = await authService.getProfile();
             setProfile(response.data);
         } catch (error) {
             handleError(error, "Failed to fetch profile");

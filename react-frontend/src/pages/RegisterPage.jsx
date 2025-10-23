@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Container, Row, Col, Form, Button, Spinner } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import { Google } from "react-bootstrap-icons";
-import { authService } from "../services"; // Import auth service
+import { AuthService } from "../services"; // Import auth service
 import { useApiErrorHandler } from "../hooks/useApiErrorHandler"; // Import error handler hook
 const RegisterPage = () => {
     const navigate = useNavigate();
@@ -56,6 +56,7 @@ const RegisterPage = () => {
             };
 
             // Gunakan authService untuk register
+            const authService = new AuthService();
             await authService.register(userData);
 
             console.log("Registration successful");

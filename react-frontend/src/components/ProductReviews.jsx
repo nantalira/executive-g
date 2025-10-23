@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Card, Alert, Spinner } from "react-bootstrap";
-import ProductService from "../services/productService";
+import ProductService from "../services/ProductService";
 import { useApiErrorHandler } from "../hooks/useApiErrorHandler";
 import CustomPagination from "./CustomPagination";
 

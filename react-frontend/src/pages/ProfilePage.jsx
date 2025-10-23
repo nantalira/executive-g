@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Container, Row, Col, Card, Button, Form, Nav, Collapse } from "react-bootstrap";
 import { ChevronDown, ChevronRight } from "react-bootstrap-icons";
-import AuthService from "../services/authService";
+import AuthService from "../services/AuthService";
 import MainLayout from "../layouts/MainLayout";
 import LoadingOverlay from "../components/LoadingOverlay";
 import AddressBook from "../components/AddressBook";

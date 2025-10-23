@@ -50,4 +50,4 @@ class AddressService {
     }
 }
 
-export default new AddressService();
+export default AddressService;

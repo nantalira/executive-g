@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Row, Col, Form, Button } from "react-bootstrap";
 import { useOutletContext } from "react-router-dom";
-import AuthService from "../../services/authService";
+import AuthService from "../../services/AuthService";
 import { useApiErrorHandler } from "../../hooks/useApiErrorHandler";
 const MyProfile = () => {
     const { profile, fetchProfile } = useOutletContext();

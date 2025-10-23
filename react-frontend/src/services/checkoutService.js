@@ -1,6 +1,6 @@
 import { authApi } from "./api";
 
-const checkoutService = {
+const CheckoutService = {
     /**
      * Create direct checkout session from product detail
      */
@@ -92,4 +92,4 @@ const checkoutService = {
     },
 };
 
-export default checkoutService;
+export default CheckoutService;

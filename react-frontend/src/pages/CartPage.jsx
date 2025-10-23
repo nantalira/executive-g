@@ -2,8 +2,8 @@ import React, { useState, useEffect, useMemo, useCallback } from "react";
 import MainLayout from "../layouts/MainLayout";
 import { Container, Row, Col, Table, Button, Form, Card, Spinner, Alert } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import CartService from "../services/cartService";
-import couponService from "../services/couponService";
+import CartService from "../services/CartService";
+import CouponService from "../services/CouponService";
 import { useApiErrorHandler } from "../hooks/useApiErrorHandler";
 import { formatPrice } from "../utils/formatters";
 import CustomPagination from "../components/CustomPagination";
@@ -99,7 +99,8 @@ const CartPage = () => {
                 setLoading(true);
                 setError(null);
 
-                const response = await CartService.getCartItems({ page, per_page: perPage });
+                const cartService = new CartService();
+                const response = await cartService.getCartItems({ page, per_page: perPage });
                 const items = response.data.data || [];
                 const paginationData = response.data.pagination || {};
 
@@ -273,7 +274,8 @@ const CartPage = () => {
 
                 const timeoutId = setTimeout(async () => {
                     try {
-                        await CartService.updateCartItem(id, newQuantity);
+                        const cartService = new CartService();
+                        await cartService.updateCartItem(id, newQuantity);
                         setPendingUpdates((current) => {
                             const updated = new Map(current);
                             updated.delete(id);
@@ -306,7 +308,8 @@ const CartPage = () => {
                     return newMap;
                 });
 
-                await CartService.removeFromCart(id);
+                const cartService = new CartService();
+                await cartService.removeFromCart(id);
 
                 // Refresh current page after removal
                 await fetchCartItems(pagination.current_page, pagination.per_page);
@@ -337,6 +340,7 @@ const CartPage = () => {
             setCouponError(null);
             setCouponSuccess(null);
 
+            const couponService = new CouponService();
             const response = await couponService.checkCoupon(couponCode.trim(), subtotal);
 
             if (response.success && response.data) {

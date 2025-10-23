@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Container, Row, Col, Form, Button } from "react-bootstrap";
 import { Google } from "react-bootstrap-icons";
 import { Link, useNavigate } from "react-router-dom";
-import { authService } from "../services"; // Import auth service
+import { AuthService } from "../services"; // Import auth service
 import { useAuthStatus } from "../hooks/useAuthStatus"; // Import auth hook
 import { useApiErrorHandler } from "../hooks/useApiErrorHandler"; // Import error handler hook
 const LoginPage = () => {
@@ -29,6 +29,7 @@ const LoginPage = () => {
 
         try {
             // Gunakan authService untuk login
+            const authService = new AuthService();
             const { expires_in } = await authService.login(formData);
 
             // Update auth status setelah login berhasil

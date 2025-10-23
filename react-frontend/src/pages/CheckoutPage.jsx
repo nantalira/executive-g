@@ -2,11 +2,11 @@ import React, { useState, useEffect, useCallback } from "react";
 import MainLayout from "../layouts/MainLayout";
 import { Container, Row, Col, Button, Form, Spinner, Alert } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import CartService from "../services/cartService";
-import couponService from "../services/couponService";
-import ProductService from "../services/productService";
-import addressService from "../services/addressService";
-import OrderService from "../services/orderService";
+import CartService from "../services/CartService";
+import CouponService from "../services/CouponService";
+import ProductService from "../services/ProductService";
+import AddressService from "../services/AddressService";
+import OrderService from "../services/OrderService";
 import AddressSelectionModal from "../components/AddressSelectionModal";
 import { useApiErrorHandler } from "../hooks/useApiErrorHandler";
 import { formatPrice } from "../utils/formatters";
@@ -52,7 +52,8 @@ const CheckoutPage = () => {
     // Handle direct checkout from product detail
     const handleDirectCheckout = useCallback(async (productId, quantity = 1, variantId = null) => {
         try {
-            const productResponse = await ProductService.getProductById(productId);
+            const productService = new ProductService();
+            const productResponse = await productService.getProductById(productId);
             const product = productResponse.data?.data || productResponse.data;
 
             if (!product) {
@@ -94,7 +95,8 @@ const CheckoutPage = () => {
     // Handle checkout from cart
     const handleCartCheckout = useCallback(async () => {
         try {
-            const response = await CartService.getCartItems();
+            const cartService = new CartService();
+            const response = await cartService.getCartItems();
             const items = response.data.data || [];
 
             const selectedItemIds = JSON.parse(localStorage.getItem("selectedCartItems") || "[]");
@@ -149,6 +151,7 @@ const CheckoutPage = () => {
     const fetchPinnedAddress = useCallback(async () => {
         try {
             setAddressLoading(true);
+            const addressService = new AddressService();
             const response = await addressService.getPinnedAddress();
 
             // Check if response has data (success response structure: { message, data })
@@ -335,6 +338,7 @@ const CheckoutPage = () => {
 
             console.log("Applying coupon:", couponCode.trim(), "for subtotal:", subtotal); // Debug log
 
+            const couponService = new CouponService();
             const response = await couponService.applyCoupon(couponCode.trim(), subtotal);
 
             console.log("Coupon service response:", response); // Debug log
@@ -416,7 +420,8 @@ const CheckoutPage = () => {
             };
 
             // Create order using OrderService
-            const response = await OrderService.createOrder(orderData);
+            const orderService = new OrderService();
+            const response = await orderService.createOrder(orderData);
 
             // Show success message
             setError(null);

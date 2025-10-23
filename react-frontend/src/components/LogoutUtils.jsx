@@ -1,11 +1,12 @@
 import React from "react";
-import { authService } from "../services";
+import { AuthService } from "../services";
 
 /**
  * Simple logout function that can be used anywhere
  */
 export const handleLogout = async () => {
     try {
+        const authService = new AuthService();
         await authService.logout();
         console.log("Logout successful");
 

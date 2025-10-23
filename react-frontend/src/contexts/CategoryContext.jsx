@@ -1,6 +1,6 @@
 // src/contexts/CategoryContext.jsx
 import React, { createContext, useContext, useState, useEffect } from "react";
-import CategoryService from "../services/categoryService";
+import CategoryService from "../services/CategoryService";
 
 const CategoryContext = createContext();
 
@@ -13,7 +13,8 @@ export const CategoryProvider = ({ children }) => {
         try {
             setLoading(true);
             setError(null);
-            const response = await CategoryService.getCategories(); // Ambil semua categories
+            const categoryService = new CategoryService();
+            const response = await categoryService.getCategories(); // Ambil semua categories
             setCategories(response.data);
         } catch (error) {
             console.error("Error fetching categories:", error);

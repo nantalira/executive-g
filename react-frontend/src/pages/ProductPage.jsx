@@ -8,9 +8,9 @@ import ProductGrid from "../components/ProductGrid";
 import FilterCard from "../components/FilterCard";
 import { useCategories } from "../contexts/CategoryContext";
 import useApiErrorHandler from "../hooks/useApiErrorHandler";
-import ProductService from "../services/productService";
+import ProductService from "../services/ProductService";
 import CustomPagination from "../components/CustomPagination";
-import saleService from "../services/saleService";
+import SaleService from "../services/SaleService";
 
 const ProductPage = () => {
     const [searchParams, setSearchParams] = useSearchParams();

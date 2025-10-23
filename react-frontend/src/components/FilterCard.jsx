@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Card, Form, InputGroup, Button, Row, Col } from "react-bootstrap";
 import { Search, Filter, ChevronLeft } from "react-bootstrap-icons";
-import saleService from "../services/saleService";
+import SaleService from "../services/SaleService";
 
 const FilterCard = ({ selectedCategory, setSelectedCategory, priceRange, setPriceRange, setCurrentPage, setShowFilters, categories, selectedSort, setSelectedSort, selectedFlashSale, setSelectedFlashSale }) => {
     const [flashSalesSchedule, setFlashSalesSchedule] = useState({ active: [], upcoming: [] });
@@ -14,6 +14,7 @@ const FilterCard = ({ selectedCategory, setSelectedCategory, priceRange, setPric
     const fetchFlashSalesSchedule = async () => {
         try {
             setLoading(true);
+            const saleService = new SaleService();
             const response = await saleService.getFlashSalesSchedule();
             setFlashSalesSchedule(response.data.data);
         } catch (error) {

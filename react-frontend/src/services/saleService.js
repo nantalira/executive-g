@@ -29,4 +29,4 @@ class SaleService {
     }
 }
 
-export default new SaleService();
+export default SaleService;

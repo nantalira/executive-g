@@ -12,4 +12,4 @@ class CategoryService {
     }
 }
 
-export default new CategoryService();
+export default CategoryService;

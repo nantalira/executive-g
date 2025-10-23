@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Card, Button } from "react-bootstrap";
 import { useOutletContext } from "react-router-dom";
 import AddressModal from "./AddressModal";
-import AddressService from "../services/addressService";
+import AddressService from "../services/AddressService";
 import { useApiErrorHandler } from "../hooks/useApiErrorHandler";
 
 const AddressBook = () => {
@@ -16,7 +16,8 @@ const AddressBook = () => {
     const fetchAddresses = async () => {
         try {
             setLoading(true);
-            const response = await AddressService.getAddresses();
+            const addressService = new AddressService();
+            const response = await addressService.getAddresses();
             setAddresses(response.data || []);
         } catch (error) {
             handleError(error, "Failed to fetch addresses");
@@ -35,7 +36,8 @@ const AddressBook = () => {
         if (window.confirm("Are you sure you want to delete this address?")) {
             try {
                 setLoading(true);
-                await AddressService.deleteAddress(id);
+                const addressService = new AddressService();
+                await addressService.deleteAddress(id);
                 showSuccess("Address deleted successfully!");
                 await fetchAddresses();
             } catch (error) {
@@ -68,13 +70,15 @@ const AddressBook = () => {
                 pinned: formData.pinned ? 1 : 0,
             };
 
+            const addressService = new AddressService();
+
             if (addressId) {
                 // Edit existing address
-                await AddressService.updateAddress(addressId, addressData);
+                await addressService.updateAddress(addressId, addressData);
                 showSuccess("Address updated successfully!");
             } else {
                 // Add new address
-                await AddressService.addAddress(addressData);
+                await addressService.addAddress(addressData);
                 showSuccess("Address added successfully!");
             }
 

@@ -1,6 +1,6 @@
 import { publicApi, authApi } from "./api";
 
-const couponService = {
+const CouponService = {
     /**
      * Check/validate coupon code and calculate discount
      * Public endpoint - no authentication required
@@ -145,4 +145,4 @@ const couponService = {
     },
 };
 
-export default couponService;
+export default CouponService;

@@ -31,4 +31,4 @@ class CarouselService {
     }
 }
 
-export default new CarouselService();
+export default CarouselService;

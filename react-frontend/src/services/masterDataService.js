@@ -70,4 +70,4 @@ class MasterDataService {
     }
 }
 
-export default new MasterDataService();
+export default MasterDataService;

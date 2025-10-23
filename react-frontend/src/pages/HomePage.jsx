@@ -9,9 +9,9 @@ import NewArrival from "../components/NewArrival";
 import Features from "../components/Features";
 import VerticalLazy from "../components/VerticalLazy";
 import CarouselService from "../services/CarouselService";
-import ProductService from "../services/productService";
+import ProductService from "../services/ProductService";
 import { useApiErrorHandler } from "../hooks/useApiErrorHandler";
-import saleService from "../services/saleService";
+import SaleService from "../services/SaleService";
 import LoadingOverlay from "../components/LoadingOverlay";
 
 const HomePage = () => {
@@ -33,11 +33,15 @@ const HomePage = () => {
         try {
             setLoading(true);
             // Fetch carousels and products in parallel
+            const carouselService = new CarouselService();
+            const productService = new ProductService();
+            const saleService = new SaleService();
+
             const [heroResponse, newArrivalResponse, bestSellerResponse, regularProductsResponse, flashSaleResponse] = await Promise.all([
-                CarouselService.getCarousels({ newArrival: false, items_per_page: 6 }),
-                CarouselService.getCarousels({ newArrival: true, items_per_page: 4 }),
-                ProductService.getProducts({ filter: "best_selling", items_per_page: 5 }),
-                ProductService.getProducts({ items_per_page: 8 }),
+                carouselService.getCarousels({ newArrival: false, items_per_page: 6 }),
+                carouselService.getCarousels({ newArrival: true, items_per_page: 4 }),
+                productService.getProducts({ filter: "best_selling", items_per_page: 5 }),
+                productService.getProducts({ items_per_page: 8 }),
                 saleService.getActiveFlashSaleWithProducts({ items_per_page: 5 }),
             ]);
 
