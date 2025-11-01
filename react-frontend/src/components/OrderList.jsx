@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Card, Button, Spinner, Alert } from "react-bootstrap";
 import ReviewModal from "./ReviewModal";
 import OrderService from "../services/OrderService";
-import ReviewService from "../services/reviewService";
+import ReviewService from "../services/ReviewService";
 import { useApiErrorHandler } from "../hooks/useApiErrorHandler";
 
 const OrderList = ({ orderType = "delivered" }) => {

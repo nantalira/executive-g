@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Modal, Form, Button, Row, Col } from "react-bootstrap";
 import { AsyncPaginate } from "react-select-async-paginate";
-import MasterDataService from "../services/masterDataService";
+import MasterDataService from "../services/MasterDataService";
 
 const AddressModal = ({ show, onHide, address = null, onSave }) => {
     const [formData, setFormData] = useState({
